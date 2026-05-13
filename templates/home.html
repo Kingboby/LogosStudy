@@ -2,7 +2,41 @@
 
 {% block title %}Home — Logos{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/timer.css">
+{% endblock %}
+
 {% block content %}
     <h1>Home</h1>
     <p>Your study hub. Timer, goals, and streak all in one place.</p>
+
+    <div id="timer-widget" class="timer-widget">
+
+        <div class="timer-modes">
+            <button id="btn-pomodoro" class="timer-mode-btn active" onclick="fnSetPomodoro()">Pomodoro</button>
+            <button id="btn-custom" class="timer-mode-btn" onclick="fnSetCustom()">Custom</button>
+        </div>
+
+        <div id="custom-input" style="display:none;">
+            <input type="number" id="custom-minutes" min="1" max="180" placeholder="Minutes">
+            <button onclick="fnApplyCustomTime()">Set</button>
+        </div>
+
+        <div class="timer-display">
+            <span id="timer-time">25:00</span>
+            <span id="timer-label">Work</span>
+        </div>
+
+        <div class="timer-controls">
+            <button id="btn-start-pause" onclick="fnToggleStartPause()">Start</button>
+            <button onclick="fnResetTimer()">Reset</button>
+        </div>
+
+        <button id="btn-fullscreen" onclick="fnToggleFullscreen()">Full Focus</button>
+
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/timer.js"></script>
 {% endblock %}
