@@ -1,4 +1,5 @@
-from flask import Flask, render_template, redirect, url_for, request
+import os
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, abort
 from flask_login import login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db, loginManager
@@ -11,10 +12,26 @@ app.config["SECRET_KEY"] = "dev-secret-key"
 db.init_app(app)
 loginManager.init_app(app)
 
+LIBRARY_ROOT = os.path.join("static", "library")
+
 
 @loginManager.user_loader
 def fnLoadUser(vUserId):
     return User.query.get(int(vUserId))
+
+
+def fnScanFolder(vFolderPath):
+    lstFolders = []
+    lstFiles = []
+    if not os.path.exists(vFolderPath):
+        return lstFolders, lstFiles
+    for vItem in sorted(os.listdir(vFolderPath)):
+        vItemPath = os.path.join(vFolderPath, vItem)
+        if os.path.isdir(vItemPath):
+            lstFolders.append(vItem)
+        elif os.path.isfile(vItemPath):
+            lstFiles.append(vItem)
+    return lstFolders, lstFiles
 
 
 @app.route("/")
@@ -63,8 +80,43 @@ def fnRouteLogout():
 
 
 @app.route("/library")
-def fnRouteLibrary():
-    return render_template("library.html")
+@app.route("/library/<path:vSubPath>")
+@login_required
+def fnRouteLibrary(vSubPath=""):
+    vRealRoot = os.path.realpath(LIBRARY_ROOT)
+    vRealPath = os.path.realpath(os.path.join(LIBRARY_ROOT, vSubPath))
+
+    if not vRealPath.startswith(vRealRoot):
+        abort(403)
+
+    if not os.path.isdir(vRealPath):
+        abort(404)
+
+    lstFolders, lstFiles = fnScanFolder(vRealPath)
+
+    vParentPath = vSubPath.rsplit("/", 1)[0] if "/" in vSubPath else ""
+    isAtRoot = vSubPath == ""
+
+    return render_template("library.html",
+        tmplFolders=lstFolders,
+        tmplFiles=lstFiles,
+        tmplSubPath=vSubPath,
+        tmplParentPath=vParentPath,
+        tmplIsAtRoot=isAtRoot,
+        tmplCurrentFolder=os.path.basename(vSubPath) if vSubPath else "Library"
+    )
+
+
+@app.route("/download/<path:vFilePath>")
+@login_required
+def fnRouteDownload(vFilePath):
+    vRealRoot = os.path.realpath(LIBRARY_ROOT)
+    vRealFile = os.path.realpath(os.path.join(LIBRARY_ROOT, vFilePath))
+
+    if not vRealFile.startswith(vRealRoot):
+        abort(403)
+
+    return send_from_directory(LIBRARY_ROOT, vFilePath, as_attachment=True)
 
 
 @app.route("/community")

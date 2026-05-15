@@ -4,5 +4,49 @@
 
 {% block content %}
     <h1>Library</h1>
-    <p>Browse and download curated HSC resources by subject and category.</p>
+
+    <p>
+        <a href="/library">Library</a>
+        {% if tmplSubPath %}
+            {% for vPart in tmplSubPath.split("/") %}
+                {% set vCrumbPath = tmplSubPath.split("/")[:loop.index] | join("/") %}
+                / <a href="/library/{{ vCrumbPath }}">{{ vPart }}</a>
+            {% endfor %}
+        {% endif %}
+    </p>
+
+    {% if not tmplIsAtRoot %}
+        {% if tmplParentPath %}
+            <p><a href="/library/{{ tmplParentPath }}">← Back</a></p>
+        {% else %}
+            <p><a href="/library">← Back</a></p>
+        {% endif %}
+    {% endif %}
+
+    {% if tmplFolders %}
+        <p>Folders</p>
+        <ul>
+            {% for vFolder in tmplFolders %}
+            <li>
+                <a href="/library/{{ tmplSubPath ~ '/' ~ vFolder if tmplSubPath else vFolder }}">{{ vFolder }}/</a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if tmplFiles %}
+        <p>Files</p>
+        <ul>
+            {% for vFile in tmplFiles %}
+            <li>
+                {{ vFile }}
+                <a href="/download/{{ tmplSubPath ~ '/' ~ vFile if tmplSubPath else vFile }}">Download</a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if not tmplFolders and not tmplFiles %}
+        <p>This folder is empty.</p>
+    {% endif %}
 {% endblock %}
