@@ -55,7 +55,8 @@ def fnRouteRegister():
         dbUser = User(username=frmUsername, password=vHashedPassword)
         db.session.add(dbUser)
         db.session.commit()
-        return redirect(url_for("fnRouteLogin"))
+        login_user(dbUser)
+        return redirect(url_for("fnRouteDashboard"))
     return render_template("auth/register.html")
 
 
