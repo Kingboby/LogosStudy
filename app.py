@@ -120,11 +120,13 @@ def fnRouteDownload(vFilePath):
 
 
 @app.route("/community")
+@login_required
 def fnRouteCommunity():
     return render_template("community.html")
 
 
 @app.route("/profile")
+@login_required
 def fnRouteProfile():
     return render_template("profile.html")
 
