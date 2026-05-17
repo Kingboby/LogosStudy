@@ -1,0 +1,5 @@
+.form-error {
+    color: #c0392b;
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+}

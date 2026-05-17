@@ -51,12 +51,19 @@ def fnRouteRegister():
     if request.method == "POST":
         frmUsername = request.form.get("username")
         frmPassword = request.form.get("password")
+
+        isUsernameTaken = User.query.filter_by(username=frmUsername).first()
+        if isUsernameTaken:
+            return render_template("auth/register.html",
+                tmplError="That username is already taken. Please choose a different one.")
+
         vHashedPassword = generate_password_hash(frmPassword)
         dbUser = User(username=frmUsername, password=vHashedPassword)
         db.session.add(dbUser)
         db.session.commit()
         login_user(dbUser)
         return redirect(url_for("fnRouteDashboard"))
+
     return render_template("auth/register.html")
 
 
@@ -70,6 +77,8 @@ def fnRouteLogin():
         if isValidUser:
             login_user(dbUser)
             return redirect(url_for("fnRouteDashboard"))
+        return render_template("auth/login.html",
+            tmplError="Incorrect username or password.")
     return render_template("auth/login.html")
 
 

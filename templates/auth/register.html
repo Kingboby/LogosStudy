@@ -4,6 +4,9 @@
 
 {% block content %}
     <h1>Register</h1>
+    {% if tmplError %}
+        <p class="form-error">{{ tmplError }}</p>
+    {% endif %}
     <form method="POST" action="/register">
         <div>
             <label for="username">Username</label>
