@@ -1,3 +1,24 @@
+.streak-display {
+    display: inline-block;
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    min-width: 160px;
+    margin-bottom: 16px;
+}
+
+.streak-number {
+    font-size: 52px;
+    line-height: 1;
+}
+
+.streak-label {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
 .timer-widget {
     display: inline-block;
     border: 1px solid #ccc;

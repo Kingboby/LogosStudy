@@ -1,9 +1,10 @@
 import os
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory, abort
-from flask_login import login_user, logout_user, login_required
+from datetime import date
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, abort, jsonify
+from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db, loginManager
-from models import User
+from models import User, StudySession
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///logos.db"
@@ -43,7 +44,7 @@ def fnRouteWelcome():
 @app.route("/home")
 @login_required
 def fnRouteDashboard():
-    return render_template("home.html")
+    return render_template("home.html", tmplStreak=current_user.streak)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -87,6 +88,34 @@ def fnRouteLogin():
 def fnRouteLogout():
     logout_user()
     return redirect(url_for("fnRouteLogin"))
+
+
+@app.route("/save-session", methods=["POST"])
+@login_required
+def fnRouteSaveSession():
+    vData = request.get_json()
+    vDuration = vData.get("duration")
+    vSessionType = vData.get("session_type")
+
+    dbSession = StudySession(
+        user_id=current_user.id,
+        duration=vDuration,
+        session_type=vSessionType
+    )
+    db.session.add(dbSession)
+
+    vToday = date.today()
+    vLastActive = current_user.last_active
+
+    if vLastActive is None or (vToday - vLastActive).days > 1:
+        current_user.streak = 1
+    elif (vToday - vLastActive).days == 1:
+        current_user.streak += 1
+
+    current_user.last_active = vToday
+    db.session.commit()
+
+    return jsonify({"streak": current_user.streak})
 
 
 @app.route("/library")

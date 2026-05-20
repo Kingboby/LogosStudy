@@ -52,6 +52,21 @@ function fnResetTimer() {
     fnUpdateDisplay();
 }
 
+function fnSaveSession(vDuration, vSessionType) {
+    fetch('/save-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration: vDuration, session_type: vSessionType })
+    })
+    .then(function(vResponse) { return vResponse.json(); })
+    .then(function(vData) {
+        const vStreakEl = document.getElementById('streak-count');
+        if (vStreakEl) {
+            vStreakEl.textContent = vData.streak;
+        }
+    });
+}
+
 function fnOnTimerEnd() {
     clearInterval(vTimerInterval);
     isRunning = false;
@@ -59,6 +74,7 @@ function fnOnTimerEnd() {
 
     if (isPomodoro) {
         if (!isBreak) {
+            fnSaveSession(POMODORO_WORK, 'Pomodoro');
             isBreak = true;
             vSecondsLeft = POMODORO_BREAK;
             vTotalSeconds = POMODORO_BREAK;
@@ -72,6 +88,8 @@ function fnOnTimerEnd() {
             vTotalSeconds = POMODORO_WORK;
             fnUpdateDisplay();
         }
+    } else {
+        fnSaveSession(vTotalSeconds, 'Custom');
     }
 }
 
