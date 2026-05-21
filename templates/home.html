@@ -11,8 +11,39 @@
     <p>Your study hub. Timer, goals, and streak all in one place.</p>
 
     <div class="streak-display">
-        <div class="streak-number"><span id="streak-count">{{ tmplStreak }}</span> d</div>
-        <span class="streak-label">Streak</span>
+        <div class="streak-number"><span id="streak-count">{{ tmplStreak }}</span></div>
+        <span class="streak-label">Day Streak</span>
+    </div>
+
+    <div class="activity-graph">
+        <div class="activity-header">
+            <div class="activity-day-spacer"></div>
+            <div class="activity-months-row">
+                {% for vMonth in tmplMonthLabels %}
+                <span class="activity-month-label" style="left: calc({{ vMonth.col }} * 14px)">{{ vMonth.label }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="activity-body">
+            <div class="activity-day-labels">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+            </div>
+            <div class="activity-grid">
+                {% for vWeek in tmplActivityGrid %}
+                <div class="activity-week">
+                    {% for vDay in vWeek %}
+                    <div class="activity-day {{ vDay.css_class }}" title="{{ vDay.date }}: {% if vDay.count == 0 %}no sessions{% elif vDay.count == 1 %}1 session{% else %}{{ vDay.count }} sessions{% endif %}"></div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
     <div id="timer-widget" class="timer-widget">

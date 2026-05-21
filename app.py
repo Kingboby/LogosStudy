@@ -1,5 +1,6 @@
 import os
-from datetime import date
+from datetime import date, timedelta
+from sqlalchemy import func
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, abort, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -35,6 +36,34 @@ def fnScanFolder(vFolderPath):
     return lstFolders, lstFiles
 
 
+def fnBuildActivityGrid(dctSessionCounts):
+    vToday = date.today()
+    vEndDate = vToday + timedelta(days=(6 - vToday.weekday()))
+    vStartDate = vEndDate - timedelta(days=363)
+
+    lstWeeks = []
+    lstMonthLabels = []
+    vSeenMonths = set()
+
+    for vWeekIndex in range(52):
+        lstWeek = []
+        for vDayIndex in range(7):
+            vDate = vStartDate + timedelta(weeks=vWeekIndex, days=vDayIndex)
+            vDateStr = vDate.strftime("%Y-%m-%d")
+            vCount = dctSessionCounts.get(vDateStr, 0) if vDate <= vToday else 0
+            vCssClass = "day-" + str(min(vCount, 3))
+            lstWeek.append({"date": vDateStr, "count": vCount, "css_class": vCssClass})
+
+            vMonthKey = (vDate.year, vDate.month)
+            if vMonthKey not in vSeenMonths:
+                vSeenMonths.add(vMonthKey)
+                lstMonthLabels.append({"label": vDate.strftime("%b"), "col": vWeekIndex})
+
+        lstWeeks.append(lstWeek)
+
+    return lstWeeks, lstMonthLabels
+
+
 @app.route("/")
 @app.route("/welcome")
 def fnRouteWelcome():
@@ -44,7 +73,28 @@ def fnRouteWelcome():
 @app.route("/home")
 @login_required
 def fnRouteDashboard():
-    return render_template("home.html", tmplStreak=current_user.streak)
+    vToday = date.today()
+    vYearAgo = vToday - timedelta(days=364)
+
+    lstRawCounts = (
+        db.session.query(
+            func.date(StudySession.date).label("session_date"),
+            func.count(StudySession.id).label("session_count")
+        )
+        .filter(StudySession.user_id == current_user.id)
+        .filter(StudySession.date >= vYearAgo)
+        .group_by(func.date(StudySession.date))
+        .all()
+    )
+
+    dctSessionCounts = {str(row.session_date): row.session_count for row in lstRawCounts}
+    lstActivityGrid, lstMonthLabels = fnBuildActivityGrid(dctSessionCounts)
+
+    return render_template("home.html",
+        tmplStreak=current_user.streak,
+        tmplActivityGrid=lstActivityGrid,
+        tmplMonthLabels=lstMonthLabels
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])

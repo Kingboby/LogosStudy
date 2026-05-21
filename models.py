@@ -18,11 +18,3 @@ class StudySession(db.Model):
     session_type = db.Column(db.String(20), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-
-class Resource(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    subject = db.Column(db.String(50), nullable=False)
-    category = db.Column(db.String(50), nullable=True)
-    file_path = db.Column(db.String(200), nullable=False, unique=True)
-    year = db.Column(db.Integer, nullable=True)

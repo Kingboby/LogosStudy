@@ -1,3 +1,73 @@
+.activity-graph {
+    overflow-x: auto;
+    margin-bottom: 16px;
+}
+
+.activity-header {
+    display: flex;
+    margin-bottom: 4px;
+}
+
+.activity-day-spacer {
+    width: 28px;
+    flex-shrink: 0;
+}
+
+.activity-months-row {
+    position: relative;
+    height: 16px;
+    flex: 1;
+}
+
+.activity-month-label {
+    position: absolute;
+    font-size: 11px;
+    color: #666;
+    white-space: nowrap;
+}
+
+.activity-body {
+    display: flex;
+    gap: 4px;
+}
+
+.activity-day-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 24px;
+    flex-shrink: 0;
+}
+
+.activity-day-labels span {
+    font-size: 10px;
+    color: #666;
+    height: 12px;
+    line-height: 12px;
+}
+
+.activity-grid {
+    display: flex;
+    gap: 2px;
+}
+
+.activity-week {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.activity-day {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.day-0 { background: #ebedf0; }
+.day-1 { background: #9be9a8; }
+.day-2 { background: #40c463; }
+.day-3 { background: #216e39; }
+
 .form-error {
     color: #c0392b;
     font-size: var(--text-sm);
