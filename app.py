@@ -5,7 +5,7 @@ from flask import Flask, render_template, redirect, url_for, request, send_from_
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db, loginManager
-from models import User, StudySession
+from models import User, StudySession, Goal
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///logos.db"
@@ -90,10 +90,26 @@ def fnRouteDashboard():
     dctSessionCounts = {str(row.session_date): row.session_count for row in lstRawCounts}
     lstActivityGrid, lstMonthLabels = fnBuildActivityGrid(dctSessionCounts)
 
+    lstIncompleteGoals = (
+        Goal.query
+        .filter_by(user_id=current_user.id, is_complete=False)
+        .order_by(Goal.created_at.desc())
+        .limit(5)
+        .all()
+    )
+    lstAllGoals = (
+        Goal.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Goal.is_complete.asc(), Goal.created_at.desc())
+        .all()
+    )
+
     return render_template("home.html",
         tmplStreak=current_user.streak,
         tmplActivityGrid=lstActivityGrid,
-        tmplMonthLabels=lstMonthLabels
+        tmplMonthLabels=lstMonthLabels,
+        tmplIncompleteGoals=lstIncompleteGoals,
+        tmplAllGoals=lstAllGoals
     )
 
 
@@ -166,6 +182,45 @@ def fnRouteSaveSession():
     db.session.commit()
 
     return jsonify({"streak": current_user.streak})
+
+
+@app.route("/goal/add", methods=["POST"])
+@login_required
+def fnRouteAddGoal():
+    vData = request.get_json()
+    vDescription = vData.get("description", "").strip()
+    if not vDescription:
+        return jsonify({"error": "Description is empty"}), 400
+    dbGoal = Goal(user_id=current_user.id, description=vDescription)
+    db.session.add(dbGoal)
+    db.session.commit()
+    return jsonify({
+        "id": dbGoal.id,
+        "description": dbGoal.description,
+        "is_complete": dbGoal.is_complete
+    })
+
+
+@app.route("/goal/complete/<int:vGoalId>", methods=["POST"])
+@login_required
+def fnRouteGoalComplete(vGoalId):
+    dbGoal = Goal.query.get_or_404(vGoalId)
+    if dbGoal.user_id != current_user.id:
+        return jsonify({"error": "Unauthorised"}), 403
+    dbGoal.is_complete = not dbGoal.is_complete
+    db.session.commit()
+    return jsonify({"id": dbGoal.id, "is_complete": dbGoal.is_complete})
+
+
+@app.route("/goal/delete/<int:vGoalId>", methods=["POST"])
+@login_required
+def fnRouteDeleteGoal(vGoalId):
+    dbGoal = Goal.query.get_or_404(vGoalId)
+    if dbGoal.user_id != current_user.id:
+        return jsonify({"error": "Unauthorised"}), 403
+    db.session.delete(dbGoal)
+    db.session.commit()
+    return jsonify({"deleted": vGoalId})
 
 
 @app.route("/library")

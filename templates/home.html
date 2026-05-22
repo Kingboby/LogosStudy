@@ -71,8 +71,173 @@
         <button id="btn-fullscreen" onclick="fnToggleFullscreen()">Full Focus</button>
 
     </div>
+
+    <div class="goals-widget">
+        <div class="goals-widget-header">
+            <span>Goals</span>
+            <button onclick="fnOpenGoals()">Edit</button>
+        </div>
+        <div class="goals-list">
+            {% for vGoal in tmplIncompleteGoals %}
+            <div class="goals-row" data-goal-id="{{ vGoal.id }}">
+                <span class="goals-description">{{ vGoal.description }}</span>
+                <div class="goals-row-actions">
+                    <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="Mark complete">✓</button>
+                    <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete">×</button>
+                </div>
+            </div>
+            {% else %}
+            <p class="goals-empty">No goals yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="goals-fullscreen" class="goals-fullscreen" style="display:none;">
+        <div class="goals-fullscreen-inner">
+            <div class="goals-fullscreen-header">
+                <span>Goals</span>
+                <button onclick="fnCloseGoals()">Close</button>
+            </div>
+
+            <div class="goals-add-form">
+                <input type="text" id="goal-input" placeholder="Add a goal..." maxlength="200">
+                <button onclick="fnAddGoal()">Add</button>
+            </div>
+
+            <div id="goals-full-list" class="goals-all-list">
+                {% for vGoal in tmplAllGoals %}
+                <div class="goal-item {% if vGoal.is_complete %}goals-complete{% endif %}" id="goal-{{ vGoal.id }}">
+                    <span class="goals-description">{{ vGoal.description }}</span>
+                    <div class="goals-row-actions">
+                        <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="{% if vGoal.is_complete %}Mark incomplete{% else %}Mark complete{% endif %}">{% if vGoal.is_complete %}↩{% else %}✓{% endif %}</button>
+                        <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete">×</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="/static/js/timer.js"></script>
+<script>
+function fnOpenGoals() {
+    document.getElementById('goals-fullscreen').style.display = 'flex';
+}
+
+function fnCloseGoals() {
+    document.getElementById('goals-fullscreen').style.display = 'none';
+}
+
+function fnAddGoal() {
+    const vInput = document.getElementById('goal-input');
+    const vDescription = vInput.value.trim();
+    if (!vDescription) return;
+    fetch('/goal/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: vDescription })
+    })
+    .then(function(vResponse) { return vResponse.json(); })
+    .then(function(vData) {
+        fnAppendGoalToList(vData);
+        vInput.value = '';
+    });
+}
+
+function fnToggleGoalComplete(vBtn, vGoalId) {
+    fetch('/goal/complete/' + vGoalId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(function(vResponse) { return vResponse.json(); })
+    .then(function(vData) {
+        const vItem = vBtn.closest('.goal-item, .goals-row');
+        const vFullItem = document.getElementById('goal-' + vGoalId);
+        const vCompactRow = document.querySelector('.goals-list [data-goal-id="' + vGoalId + '"]');
+
+        if (vData.is_complete) {
+            // Sync fullscreen item to completed state
+            if (vFullItem) {
+                vFullItem.classList.add('goals-complete');
+                const vFullBtn = vFullItem.querySelector('.goals-row-actions button');
+                vFullBtn.textContent = '↩';
+                vFullBtn.title = 'Mark incomplete';
+            }
+            // Remove from compact — completed goals don't belong there
+            if (vCompactRow) { vCompactRow.remove(); }
+        } else {
+            // Sync fullscreen item to incomplete state
+            if (vFullItem) {
+                vFullItem.classList.remove('goals-complete');
+                const vFullBtn = vFullItem.querySelector('.goals-row-actions button');
+                vFullBtn.textContent = '✓';
+                vFullBtn.title = 'Mark complete';
+            }
+            // Add back to compact if not already there
+            if (!vCompactRow) {
+                const vDescription = vFullItem ? vFullItem.querySelector('.goals-description').textContent : '';
+                const vCompactList = document.querySelector('.goals-list');
+                const vEmpty = vCompactList.querySelector('.goals-empty');
+                if (vEmpty) { vEmpty.remove(); }
+                const vNewRow = document.createElement('div');
+                vNewRow.className = 'goals-row';
+                vNewRow.dataset.goalId = vGoalId;
+                vNewRow.innerHTML =
+                    '<span class="goals-description">' + vDescription + '</span>' +
+                    '<div class="goals-row-actions">' +
+                    '<button onclick="fnToggleGoalComplete(this, ' + vGoalId + ')" title="Mark complete">&#10003;</button>' +
+                    '<button onclick="fnDeleteGoal(this, ' + vGoalId + ')" title="Delete">&#215;</button>' +
+                    '</div>';
+                vCompactList.appendChild(vNewRow);
+            }
+        }
+    });
+}
+
+function fnDeleteGoal(vBtn, vGoalId) {
+    fetch('/goal/delete/' + vGoalId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(function(vResponse) { return vResponse.json(); })
+    .then(function() {
+        const vFullItem = document.getElementById('goal-' + vGoalId);
+        if (vFullItem) { vFullItem.remove(); }
+        const vCompactRow = document.querySelector('.goals-list [data-goal-id="' + vGoalId + '"]');
+        if (vCompactRow) { vCompactRow.remove(); }
+    });
+}
+
+function fnAppendGoalToList(vGoal) {
+    const vList = document.getElementById('goals-full-list');
+    const vItem = document.createElement('div');
+    vItem.className = 'goal-item';
+    vItem.id = 'goal-' + vGoal.id;
+    vItem.innerHTML =
+        '<span class="goals-description">' + vGoal.description + '</span>' +
+        '<div class="goals-row-actions">' +
+        '<button onclick="fnToggleGoalComplete(this, ' + vGoal.id + ')" title="Mark complete">&#10003;</button>' +
+        '<button onclick="fnDeleteGoal(this, ' + vGoal.id + ')" title="Delete">&#215;</button>' +
+        '</div>';
+    vList.prepend(vItem);
+
+    const vCompactList = document.querySelector('.goals-list');
+    const vEmpty = vCompactList.querySelector('.goals-empty');
+    if (vEmpty) { vEmpty.remove(); }
+    if (!vCompactList.querySelector('[data-goal-id="' + vGoal.id + '"]')) {
+        const vCompactRow = document.createElement('div');
+        vCompactRow.className = 'goals-row';
+        vCompactRow.dataset.goalId = vGoal.id;
+        vCompactRow.innerHTML =
+            '<span class="goals-description">' + vGoal.description + '</span>' +
+            '<div class="goals-row-actions">' +
+            '<button onclick="fnToggleGoalComplete(this, ' + vGoal.id + ')" title="Mark complete">&#10003;</button>' +
+            '<button onclick="fnDeleteGoal(this, ' + vGoal.id + ')" title="Delete">&#215;</button>' +
+            '</div>';
+        vCompactList.appendChild(vCompactRow);
+    }
+}
+</script>
 {% endblock %}
