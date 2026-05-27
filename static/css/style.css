@@ -386,6 +386,10 @@ nav.rail ul li a.active {
     color: var(--paper-2);
 }
 
+nav.rail ul li a.active img {
+    filter: invert(1);
+}
+
 main {
     margin-left: 44px;
 }
