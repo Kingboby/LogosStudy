@@ -39,13 +39,13 @@ def fnScanFolder(vFolderPath):
 def fnBuildActivityGrid(dctSessionCounts):
     vToday = date.today()
     vEndDate = vToday + timedelta(days=(6 - vToday.weekday()))
-    vStartDate = vEndDate - timedelta(days=363)
+    vStartDate = vEndDate - timedelta(days=181)
 
     lstWeeks = []
     lstMonthLabels = []
     vSeenMonths = set()
 
-    for vWeekIndex in range(52):
+    for vWeekIndex in range(26):
         lstWeek = []
         for vDayIndex in range(7):
             vDate = vStartDate + timedelta(weeks=vWeekIndex, days=vDayIndex)
@@ -74,7 +74,7 @@ def fnRouteWelcome():
 @login_required
 def fnRouteDashboard():
     vToday = date.today()
-    vYearAgo = vToday - timedelta(days=364)
+    vSixMonthsAgo = vToday - timedelta(days=182)
 
     lstRawCounts = (
         db.session.query(
@@ -82,7 +82,7 @@ def fnRouteDashboard():
             func.count(StudySession.id).label("session_count")
         )
         .filter(StudySession.user_id == current_user.id)
-        .filter(StudySession.date >= vYearAgo)
+        .filter(StudySession.date >= vSixMonthsAgo)
         .group_by(func.date(StudySession.date))
         .all()
     )
