@@ -3,6 +3,18 @@
 {% block title %}Profile — Logos{% endblock %}
 
 {% block content %}
-    <h1>Profile</h1>
-    <p>Your streak, study history, and settings.</p>
+    <h1>{{ tmplUsername }}</h1>
+
+    <a href="/logout">Logout</a>
+
+    <div class="profile-stats">
+        <div class="profile-stat-card">
+            <span class="profile-stat-number">{{ tmplTotalSessions }}</span>
+            <span class="profile-stat-label">Sessions Completed</span>
+        </div>
+        <div class="profile-stat-card">
+            <span class="profile-stat-number">{{ tmplTotalMinutes }}</span>
+            <span class="profile-stat-label">Minutes Studied</span>
+        </div>
+    </div>
 {% endblock %}

@@ -272,7 +272,14 @@ def fnRouteCommunity():
 @app.route("/profile")
 @login_required
 def fnRouteProfile():
-    return render_template("profile.html")
+    vTotalSessions = StudySession.query.filter_by(user_id=current_user.id).count()
+    vTotalSeconds = db.session.query(func.sum(StudySession.duration)).filter(StudySession.user_id == current_user.id).scalar() or 0
+    vTotalMinutes = round(vTotalSeconds / 60)
+    return render_template("profile.html",
+        tmplUsername=current_user.username,
+        tmplTotalSessions=vTotalSessions,
+        tmplTotalMinutes=vTotalMinutes
+    )
 
 
 @app.route("/offline")
