@@ -1,3 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap');
+
+:root {
+    --canvas:      #e8e8e8;
+    --paper:       #f4f4f4;
+    --paper-2:     #ffffff;
+    --chrome:      #d4d4d4;
+    --chrome-edge: #c2c2c2;
+    --line:        #cfcfcf;
+    --line-soft:   #dedede;
+    --ink:         #1a1a1a;
+    --ink-2:       #404040;
+    --ink-mid:     #737373;
+    --ink-soft:    #a3a3a3;
+    --ink-fade:    #c2c2c2;
+    --accent:      #a08060;
+    --accent-soft: rgba(160, 128, 96, 0.12);
+    --accent-ink:  #6b5540;
+    --ok:          #5a8a5a;
+    --warn:        #b06040;
+    --serif: "Instrument Serif", "Times New Roman", serif;
+    --sans:  "Geist", "Helvetica Neue", Helvetica, sans-serif;
+    --mono:  "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 14px;
+    --shadow-tile: 0 1px 0 rgba(0,0,0,0.04), 0 14px 30px -18px rgba(0,0,0,0.18);
+}
+
 .activity-graph {
     overflow-x: auto;
     margin-bottom: 16px;
@@ -184,4 +213,179 @@
 
 .goals-all-list .goals-row {
     font-size: 13px;
+}
+
+/* --- Moved from timer.css --- */
+
+.streak-display {
+    display: inline-block;
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    min-width: 160px;
+    margin-bottom: 16px;
+}
+
+.streak-number {
+    font-size: 52px;
+    line-height: 1;
+}
+
+.streak-label {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.timer-widget {
+    display: inline-block;
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    min-width: 260px;
+}
+
+.timer-modes {
+    margin-bottom: 12px;
+}
+
+.timer-mode-btn {
+    margin: 0 4px;
+    cursor: pointer;
+}
+
+.timer-mode-btn.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+#custom-input {
+    margin-bottom: 12px;
+}
+
+#custom-minutes {
+    width: 60px;
+}
+
+.timer-display {
+    margin: 16px 0;
+}
+
+#timer-time {
+    display: block;
+    font-size: 52px;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+
+#timer-label {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.timer-controls {
+    margin: 12px 0;
+}
+
+.timer-controls button {
+    margin: 0 4px;
+    cursor: pointer;
+}
+
+#btn-fullscreen {
+    margin-top: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.timer-fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+.timer-fullscreen #timer-time {
+    font-size: 140px;
+}
+
+.timer-fullscreen #timer-label {
+    font-size: 18px;
+}
+
+/* --- Sidebar rail --- */
+
+nav.rail {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 44px;
+    height: 100vh;
+    background: var(--paper);
+    border-right: 1px solid var(--line-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    gap: 10px;
+    z-index: 100;
+}
+
+nav.rail strong {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-size: 14px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1;
+}
+
+nav.rail ul {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 0 0;
+}
+
+nav.rail ul li a {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-soft);
+    letter-spacing: 0.06em;
+    text-decoration: none;
+}
+
+nav.rail ul li a.active {
+    background: var(--ink);
+    color: var(--paper-2);
+}
+
+main {
+    margin-left: 44px;
 }
