@@ -1,5 +1,7 @@
 import os
-from datetime import date, timedelta
+import requests
+from datetime import date, datetime, timedelta
+from icalendar import Calendar as ICalendar
 from sqlalchemy import func
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, abort, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
@@ -263,10 +265,80 @@ def fnRouteDownload(vFilePath):
     return send_from_directory(LIBRARY_ROOT, vFilePath, as_attachment=True)
 
 
-@app.route("/community")
+@app.route("/calendar")
 @login_required
-def fnRouteCommunity():
-    return render_template("community.html")
+def fnRouteCalendar():
+    if not current_user.calendar_url:
+        return render_template("calendar.html",
+            tmplShowSetup=True,
+            tmplCalendarUrl=None
+        )
+
+    vToday = date.today()
+    lstEvents = []
+
+    try:
+        vResponse = requests.get(current_user.calendar_url, timeout=10)
+        vResponse.raise_for_status()
+        vCal = ICalendar.from_ical(vResponse.content)
+
+        for vComponent in vCal.walk():
+            if vComponent.name != "VEVENT":
+                continue
+            vDtstart = vComponent.get("DTSTART")
+            if vDtstart is None:
+                continue
+            vStart = vDtstart.dt
+
+            if isinstance(vStart, datetime):
+                if vStart.tzinfo:
+                    vStart = vStart.replace(tzinfo=None)
+                vStartDate = vStart.date()
+                vDisplayDate = vStart.strftime("%a %d %b")
+                vDisplayTime = vStart.strftime("%H:%M")
+            else:
+                vStartDate = vStart
+                vDisplayDate = vStart.strftime("%a %d %b")
+                vDisplayTime = "all day"
+
+            if vStartDate < vToday:
+                continue
+
+            lstEvents.append({
+                "title": str(vComponent.get("SUMMARY", "Untitled event")),
+                "start": vStart,
+                "description": str(vComponent.get("DESCRIPTION", "")),
+                "display_date": vDisplayDate,
+                "display_time": vDisplayTime
+            })
+
+        lstEvents.sort(key=lambda e: e["start"] if isinstance(e["start"], datetime)
+            else datetime(e["start"].year, e["start"].month, e["start"].day))
+        lstEvents = lstEvents[:20]
+
+    except Exception:
+        return render_template("calendar.html",
+            tmplShowSetup=True,
+            tmplCalendarUrl=current_user.calendar_url,
+            tmplError="Could not load calendar."
+        )
+
+    return render_template("calendar.html",
+        tmplShowSetup=False,
+        tmplEvents=lstEvents,
+        tmplCalendarUrl=current_user.calendar_url
+    )
+
+
+@app.route("/calendar/save-url", methods=["POST"])
+@login_required
+def fnRouteSaveCalendarUrl():
+    frmCalendarUrl = request.form.get("calendar_url", "").strip()
+    if not frmCalendarUrl or not frmCalendarUrl.endswith(".ics"):
+        return redirect(url_for("fnRouteCalendar"))
+    current_user.calendar_url = frmCalendarUrl
+    db.session.commit()
+    return redirect(url_for("fnRouteCalendar"))
 
 
 @app.route("/profile")

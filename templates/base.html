@@ -14,9 +14,12 @@
         <ul>
             <li><a href="/home" {% if request.path == '/home' %}class="active"{% endif %}><img src="/static/icons/house.svg" width="18" height="18"></a></li>
             <li><a href="/library" {% if request.path.startswith('/library') %}class="active"{% endif %}><img src="/static/icons/library.svg" width="18" height="18"></a></li>
-            <li><a href="/community" {% if request.path == '/community' %}class="active"{% endif %}><img src="/static/icons/community.svg" width="18" height="18"></a></li>
+            <li><a href="/calendar" {% if request.path == '/calendar' %}class="active"{% endif %}><img src="/static/icons/calendar.svg" width="18" height="18"></a></li>
             <li><a href="/profile" {% if request.path == '/profile' %}class="active"{% endif %}><img src="/static/icons/user.svg" width="18" height="18"></a></li>
         </ul>
+        <a href="/logout" class="logout-btn" aria-label="Logout">
+            <img src="/static/icons/log-out.svg" width="18" height="18" alt="">
+        </a>
     </nav>
 
     <main>

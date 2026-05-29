@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Calendar — Logos{% endblock %}
+
+{% block content %}
+<div class="cal-head">
+    <div>
+        <p class="cal-eyebrow">Calendar</p>
+        {% if tmplShowSetup %}
+        <h3 class="cal-title">Connect your calendar.</h3>
+        {% else %}
+        <h3 class="cal-title">Upcoming events.</h3>
+        {% endif %}
+    </div>
+    {% if not tmplShowSetup %}
+    <button class="cal-chip" id="btnChangeUrl" onclick="fnToggleChangeForm()">change</button>
+    {% endif %}
+</div>
+
+<div class="cal-content">
+    {% if tmplError %}
+    <p class="cal-error">{{ tmplError }}</p>
+    {% endif %}
+
+    {% if tmplShowSetup %}
+    <p class="cal-hint">Paste your .ics calendar link to get started.</p>
+    <form class="cal-form" action="/calendar/save-url" method="POST">
+        <input class="cal-input" type="url" name="calendar_url" placeholder="https://…" required>
+        <button class="cal-save-btn" type="submit">Save</button>
+    </form>
+
+    {% else %}
+    <div class="cal-form-wrap" id="calChangeForm">
+        <form class="cal-form" action="/calendar/save-url" method="POST">
+            <input class="cal-input" type="url" name="calendar_url" value="{{ tmplCalendarUrl or '' }}" placeholder="https://…" required>
+            <button class="cal-save-btn" type="submit">Save</button>
+        </form>
+    </div>
+
+    {% if tmplEvents %}
+    <ul class="cal-list">
+        {% for vEvent in tmplEvents %}
+        <li class="cal-item">
+            <span class="cal-item-title">{{ vEvent.title }}</span>
+            <span class="cal-item-meta">{{ vEvent.display_date }} · {{ vEvent.display_time }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="cal-empty">No upcoming events.</p>
+    {% endif %}
+    {% endif %}
+</div>
+
+{% if not tmplShowSetup %}
+<script>
+function fnToggleChangeForm() {
+    document.getElementById("calChangeForm").classList.toggle("is-visible");
+}
+</script>
+{% endif %}
+{% endblock %}

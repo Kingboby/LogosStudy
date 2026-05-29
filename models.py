@@ -9,6 +9,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     streak = db.Column(db.Integer, default=0)
     last_active = db.Column(db.Date, nullable=True)
+    calendar_url = db.Column(db.String(500), nullable=True)
 
 
 class Goal(db.Model):
