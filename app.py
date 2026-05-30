@@ -106,12 +106,56 @@ def fnRouteDashboard():
         .all()
     )
 
+    vHour = datetime.now().hour
+    if vHour < 12:
+        vGreeting = "Good morning"
+    elif vHour < 17:
+        vGreeting = "Good afternoon"
+    else:
+        vGreeting = "Good evening"
+
+    vDateDisplay = vToday.strftime("%a").upper() + " " + str(vToday.day) + " " + vToday.strftime("%b").upper()
+    vWeekNum = vToday.isocalendar()[1]
+
+    vFourteenDaysAgo = vToday - timedelta(days=13)
+    lstLast14Raw = (
+        db.session.query(
+            func.date(StudySession.date).label("session_date"),
+            func.count(StudySession.id).label("session_count")
+        )
+        .filter(StudySession.user_id == current_user.id)
+        .filter(StudySession.date >= vFourteenDaysAgo)
+        .group_by(func.date(StudySession.date))
+        .all()
+    )
+    dctLast14Counts = {str(row.session_date): row.session_count for row in lstLast14Raw}
+    lstLast14Days = []
+    for vDayOffset in range(13, -1, -1):
+        vDayDate = vToday - timedelta(days=vDayOffset)
+        vDayStr = vDayDate.strftime("%Y-%m-%d")
+        vDayCount = dctLast14Counts.get(vDayStr, 0)
+        lstLast14Days.append({
+            "date": vDayStr,
+            "css_class": "day-" + str(min(vDayCount, 3))
+        })
+
+    vGoalTotalCount = Goal.query.filter_by(user_id=current_user.id).count()
+    vGoalCompleteCount = Goal.query.filter_by(user_id=current_user.id, is_complete=True).count()
+
     return render_template("home.html",
         tmplStreak=current_user.streak,
         tmplActivityGrid=lstActivityGrid,
         tmplMonthLabels=lstMonthLabels,
         tmplIncompleteGoals=lstIncompleteGoals,
-        tmplAllGoals=lstAllGoals
+        tmplAllGoals=lstAllGoals,
+        tmplUsername=current_user.username,
+        tmplLongestStreak=current_user.longest_streak,
+        tmplLast14Days=lstLast14Days,
+        tmplGreeting=vGreeting,
+        tmplDateStr=vDateDisplay,
+        tmplWeekNum=vWeekNum,
+        tmplGoalTotalCount=vGoalTotalCount,
+        tmplGoalCompleteCount=vGoalCompleteCount
     )
 
 
@@ -181,6 +225,8 @@ def fnRouteSaveSession():
         current_user.streak += 1
 
     current_user.last_active = vToday
+    if current_user.streak > current_user.longest_streak:
+        current_user.longest_streak = current_user.streak
     db.session.commit()
 
     return jsonify({"streak": current_user.streak})

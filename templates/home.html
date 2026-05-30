@@ -3,116 +3,139 @@
 {% block title %}Home — Logos{% endblock %}
 
 {% block content %}
-    <h1>Home</h1>
-    <p>Your study hub. Timer, goals, and streak all in one place.</p>
+<div class="dashboard">
 
-    <div class="streak-display">
-        <div class="streak-number"><span id="streak-count">{{ tmplStreak }}</span></div>
-        <span class="streak-label">Day Streak</span>
-    </div>
+    <header class="dashboard-header">
+        <p class="dash-date">{{ tmplDateStr }}</p>
+        <p class="dash-greeting">{{ tmplGreeting }}, <em>{{ tmplUsername }}.</em></p>
+    </header>
 
-    <div class="activity-graph">
-        <div class="activity-header">
-            <div class="activity-day-spacer"></div>
-            <div class="activity-months-row">
-                {% for vMonth in tmplMonthLabels %}
-                <span class="activity-month-label" style="left: calc({{ vMonth.col }} * 14px)">{{ vMonth.label }}</span>
-                {% endfor %}
+    <div class="dashboard-grid">
+
+        <!-- Card 1: Timer -->
+        <div id="timer-widget" class="dash-card dash-card-timer">
+            <p class="dash-card-label">Study Timer</p>
+
+            <div class="timer-modes">
+                <button id="btn-pomodoro" class="timer-mode-btn active" onclick="fnSetPomodoro()">Pomodoro</button>
+                <button id="btn-custom" class="timer-mode-btn" onclick="fnSetCustom()">Custom</button>
             </div>
-        </div>
-        <div class="activity-body">
-            <div class="activity-day-labels">
-                <span>Mon</span>
-                <span>Tue</span>
-                <span>Wed</span>
-                <span>Thu</span>
-                <span>Fri</span>
-                <span>Sat</span>
-                <span>Sun</span>
-            </div>
-            <div class="activity-grid">
-                {% for vWeek in tmplActivityGrid %}
-                <div class="activity-week">
-                    {% for vDay in vWeek %}
-                    <div class="activity-day {{ vDay.css_class }}" title="{{ vDay.date }}: {% if vDay.count == 0 %}no sessions{% elif vDay.count == 1 %}1 session{% else %}{{ vDay.count }} sessions{% endif %}"></div>
-                    {% endfor %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
 
-    <div id="timer-widget" class="timer-widget">
-
-        <div class="timer-modes">
-            <button id="btn-pomodoro" class="timer-mode-btn active" onclick="fnSetPomodoro()">Pomodoro</button>
-            <button id="btn-custom" class="timer-mode-btn" onclick="fnSetCustom()">Custom</button>
-        </div>
-
-        <div id="custom-input" style="display:none;">
-            <input type="number" id="custom-minutes" min="1" max="180" placeholder="Minutes">
-            <button onclick="fnApplyCustomTime()">Set</button>
-        </div>
-
-        <div class="timer-display">
-            <span id="timer-time">25:00</span>
-            <span id="timer-label">Work</span>
-        </div>
-
-        <div class="timer-controls">
-            <button id="btn-start-pause" onclick="fnToggleStartPause()">Start</button>
-            <button onclick="fnResetTimer()">Reset</button>
-        </div>
-
-        <button id="btn-fullscreen" onclick="fnToggleFullscreen()">Full Focus</button>
-
-    </div>
-
-    <div class="goals-widget">
-        <div class="goals-widget-header">
-            <span>Goals</span>
-            <button onclick="fnOpenGoals()">Edit</button>
-        </div>
-        <div class="goals-list">
-            {% for vGoal in tmplIncompleteGoals %}
-            <div class="goals-row" data-goal-id="{{ vGoal.id }}">
-                <span class="goals-description">{{ vGoal.description }}</span>
-                <div class="goals-row-actions">
-                    <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="Mark complete">✓</button>
-                    <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete">×</button>
+            <div class="timer-ring-wrap">
+                <svg class="timer-ring-svg" viewBox="0 0 160 160" width="140" height="140">
+                    <circle class="timer-ring-track" cx="80" cy="80" r="70"/>
+                    <circle id="timer-ring-progress" class="timer-ring-progress" cx="80" cy="80" r="70" transform="rotate(-90 80 80)"/>
+                </svg>
+                <div class="timer-time-overlay">
+                    <span id="timer-time" class="timer-time-big">25:00</span>
+                    <span id="timer-label" class="timer-label-state">Work</span>
+                    <span id="timer-total" class="timer-total-dim">/ 25:00</span>
                 </div>
             </div>
-            {% else %}
-            <p class="goals-empty">No goals yet.</p>
-            {% endfor %}
+
+            <div class="timer-btn-row">
+                <button id="btn-start-pause" class="timer-btn" onclick="fnToggleStartPause()">▶ start</button>
+                <button class="timer-btn" onclick="fnResetTimer()">⏭ end</button>
+            </div>
+
+            <button id="btn-fullscreen" class="dash-fullscreen-btn" onclick="fnToggleFullscreen()">Full Focus</button>
         </div>
-    </div>
 
-    <div id="goals-fullscreen" class="goals-fullscreen" style="display:none;">
-        <div class="goals-fullscreen-inner">
-            <div class="goals-fullscreen-header">
-                <span>Goals</span>
-                <button onclick="fnCloseGoals()">Close</button>
+        <!-- Card 2: Streak -->
+        <div class="dash-card">
+            <p class="dash-card-label">Streak</p>
+
+            <div class="streak-num-wrap">
+                <span id="streak-count" class="streak-big-num">{{ tmplStreak }}</span><span class="streak-unit"> d</span>
+            </div>
+            <p class="streak-longest">longest · {{ tmplLongestStreak }} d</p>
+
+            <div class="activity-graph">
+                <div class="activity-header">
+                    <div class="activity-day-spacer"></div>
+                    <div class="activity-months-row">
+                        {% for vMonth in tmplMonthLabels %}
+                        <span class="activity-month-label" style="left: calc({{ vMonth.col }} * 14px)">{{ vMonth.label }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="activity-body">
+                    <div class="activity-day-labels">
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                        <span>Sun</span>
+                    </div>
+                    <div class="activity-grid">
+                        {% for vWeek in tmplActivityGrid %}
+                        <div class="activity-week">
+                            {% for vDay in vWeek %}
+                            <div class="activity-day {{ vDay.css_class }}" title="{{ vDay.date }}: {% if vDay.count == 0 %}no sessions{% elif vDay.count == 1 %}1 session{% else %}{{ vDay.count }} sessions{% endif %}"></div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Goals -->
+        <div class="dash-card dash-card-goals">
+            <div class="dash-card-header">
+                <p class="dash-card-label">To-do · Today</p>
+                <span class="goals-fraction">{{ tmplGoalCompleteCount }} / {{ tmplGoalTotalCount }}</span>
             </div>
 
-            <div class="goals-add-form">
-                <input type="text" id="goal-input" placeholder="Add a goal..." maxlength="200">
-                <button onclick="fnAddGoal()">Add</button>
-            </div>
-
-            <div id="goals-full-list" class="goals-all-list">
-                {% for vGoal in tmplAllGoals %}
-                <div class="goal-item {% if vGoal.is_complete %}goals-complete{% endif %}" id="goal-{{ vGoal.id }}">
-                    <span class="goals-description">{{ vGoal.description }}</span>
+            <div class="goals-list goals-scroll">
+                {% for vGoal in tmplIncompleteGoals %}
+                <div class="goals-row goals-list-item" data-goal-id="{{ vGoal.id }}">
+                    <span class="goal-check">○</span>
+                    <span class="goals-description goal-text">{{ vGoal.description }}</span>
                     <div class="goals-row-actions">
-                        <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="{% if vGoal.is_complete %}Mark incomplete{% else %}Mark complete{% endif %}">{% if vGoal.is_complete %}↩{% else %}✓{% endif %}</button>
+                        <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="Mark complete">✓</button>
                         <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete">×</button>
                     </div>
                 </div>
+                {% else %}
+                <p class="goals-empty">No goals yet.</p>
                 {% endfor %}
             </div>
+
+            <button class="goals-edit-btn" onclick="fnOpenGoals()">Edit</button>
+        </div>
+
+    </div>
+
+
+</div>
+
+<!-- Goals fullscreen overlay — unchanged -->
+<div id="goals-fullscreen" class="goals-fullscreen" style="display:none;">
+    <div class="goals-fullscreen-inner">
+        <div class="goals-fullscreen-header">
+            <span>Goals</span>
+            <button onclick="fnCloseGoals()">Close</button>
+        </div>
+        <div class="goals-add-form">
+            <input type="text" id="goal-input" placeholder="Add a goal..." maxlength="200">
+            <button onclick="fnAddGoal()">Add</button>
+        </div>
+        <div id="goals-full-list" class="goals-all-list">
+            {% for vGoal in tmplAllGoals %}
+            <div class="goal-item {% if vGoal.is_complete %}goals-complete{% endif %}" id="goal-{{ vGoal.id }}">
+                <span class="goals-description">{{ vGoal.description }}</span>
+                <div class="goals-row-actions">
+                    <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="{% if vGoal.is_complete %}Mark incomplete{% else %}Mark complete{% endif %}">{% if vGoal.is_complete %}↩{% else %}✓{% endif %}</button>
+                    <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete">×</button>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -154,34 +177,31 @@ function fnToggleGoalComplete(vBtn, vGoalId) {
         const vCompactRow = document.querySelector('.goals-list [data-goal-id="' + vGoalId + '"]');
 
         if (vData.is_complete) {
-            // Sync fullscreen item to completed state
             if (vFullItem) {
                 vFullItem.classList.add('goals-complete');
                 const vFullBtn = vFullItem.querySelector('.goals-row-actions button');
                 vFullBtn.textContent = '↩';
                 vFullBtn.title = 'Mark incomplete';
             }
-            // Remove from compact — completed goals don't belong there
             if (vCompactRow) { vCompactRow.remove(); }
         } else {
-            // Sync fullscreen item to incomplete state
             if (vFullItem) {
                 vFullItem.classList.remove('goals-complete');
                 const vFullBtn = vFullItem.querySelector('.goals-row-actions button');
                 vFullBtn.textContent = '✓';
                 vFullBtn.title = 'Mark complete';
             }
-            // Add back to compact if not already there
             if (!vCompactRow) {
                 const vDescription = vFullItem ? vFullItem.querySelector('.goals-description').textContent : '';
                 const vCompactList = document.querySelector('.goals-list');
                 const vEmpty = vCompactList.querySelector('.goals-empty');
                 if (vEmpty) { vEmpty.remove(); }
                 const vNewRow = document.createElement('div');
-                vNewRow.className = 'goals-row';
+                vNewRow.className = 'goals-row goals-list-item';
                 vNewRow.dataset.goalId = vGoalId;
                 vNewRow.innerHTML =
-                    '<span class="goals-description">' + vDescription + '</span>' +
+                    '<span class="goal-check">○</span>' +
+                    '<span class="goals-description goal-text">' + vDescription + '</span>' +
                     '<div class="goals-row-actions">' +
                     '<button onclick="fnToggleGoalComplete(this, ' + vGoalId + ')" title="Mark complete">&#10003;</button>' +
                     '<button onclick="fnDeleteGoal(this, ' + vGoalId + ')" title="Delete">&#215;</button>' +
@@ -224,10 +244,11 @@ function fnAppendGoalToList(vGoal) {
     if (vEmpty) { vEmpty.remove(); }
     if (!vCompactList.querySelector('[data-goal-id="' + vGoal.id + '"]')) {
         const vCompactRow = document.createElement('div');
-        vCompactRow.className = 'goals-row';
+        vCompactRow.className = 'goals-row goals-list-item';
         vCompactRow.dataset.goalId = vGoal.id;
         vCompactRow.innerHTML =
-            '<span class="goals-description">' + vGoal.description + '</span>' +
+            '<span class="goal-check">○</span>' +
+            '<span class="goals-description goal-text">' + vGoal.description + '</span>' +
             '<div class="goals-row-actions">' +
             '<button onclick="fnToggleGoalComplete(this, ' + vGoal.id + ')" title="Mark complete">&#10003;</button>' +
             '<button onclick="fnDeleteGoal(this, ' + vGoal.id + ')" title="Delete">&#215;</button>' +

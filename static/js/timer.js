@@ -20,6 +20,24 @@ function fnUpdateDisplay() {
     } else {
         document.getElementById('timer-label').textContent = 'Custom';
     }
+
+    fnUpdateRing();
+}
+
+function fnUpdateRing() {
+    const vCircle = document.getElementById('timer-ring-progress');
+    if (!vCircle) return;
+    const vCircumference = 2 * Math.PI * 70;
+    const vProgress = vSecondsLeft / vTotalSeconds;
+    vCircle.style.strokeDasharray = vCircumference;
+    vCircle.style.strokeDashoffset = vCircumference * (1 - vProgress);
+
+    const vTotalEl = document.getElementById('timer-total');
+    if (vTotalEl) {
+        const vTotalMins = Math.floor(vTotalSeconds / 60);
+        const vTotalSecs = vTotalSeconds % 60;
+        vTotalEl.textContent = '/ ' + String(vTotalMins).padStart(2, '0') + ':' + String(vTotalSecs).padStart(2, '0');
+    }
 }
 
 function fnTick() {
@@ -35,10 +53,10 @@ function fnToggleStartPause() {
     if (isRunning) {
         clearInterval(vTimerInterval);
         isRunning = false;
-        document.getElementById('btn-start-pause').textContent = 'Start';
+        document.getElementById('btn-start-pause').textContent = '▶ start';
     } else {
         isRunning = true;
-        document.getElementById('btn-start-pause').textContent = 'Pause';
+        document.getElementById('btn-start-pause').textContent = '⏸ pause';
         vTimerInterval = setInterval(fnTick, 1000);
     }
 }
@@ -48,7 +66,8 @@ function fnResetTimer() {
     isRunning = false;
     isBreak = false;
     vSecondsLeft = vTotalSeconds;
-    document.getElementById('btn-start-pause').textContent = 'Start';
+    document.getElementById('btn-start-pause').textContent = '▶ start';
+    fnLockTimeDisplay();
     fnUpdateDisplay();
 }
 
@@ -70,7 +89,7 @@ function fnSaveSession(vDuration, vSessionType) {
 function fnOnTimerEnd() {
     clearInterval(vTimerInterval);
     isRunning = false;
-    document.getElementById('btn-start-pause').textContent = 'Start';
+    document.getElementById('btn-start-pause').textContent = '▶ start';
 
     if (isPomodoro) {
         if (!isBreak) {
@@ -80,7 +99,7 @@ function fnOnTimerEnd() {
             vTotalSeconds = POMODORO_BREAK;
             fnUpdateDisplay();
             isRunning = true;
-            document.getElementById('btn-start-pause').textContent = 'Pause';
+            document.getElementById('btn-start-pause').textContent = '⏸ pause';
             vTimerInterval = setInterval(fnTick, 1000);
         } else {
             isBreak = false;
@@ -100,8 +119,8 @@ function fnSetPomodoro() {
     isBreak = false;
     vSecondsLeft = POMODORO_WORK;
     vTotalSeconds = POMODORO_WORK;
-    document.getElementById('btn-start-pause').textContent = 'Start';
-    document.getElementById('custom-input').style.display = 'none';
+    document.getElementById('btn-start-pause').textContent = '▶ start';
+    fnLockTimeDisplay();
     fnUpdateDisplay();
     fnSetActiveMode('btn-pomodoro');
 }
@@ -110,18 +129,45 @@ function fnSetCustom() {
     clearInterval(vTimerInterval);
     isRunning = false;
     isPomodoro = false;
-    document.getElementById('custom-input').style.display = 'block';
-    document.getElementById('btn-start-pause').textContent = 'Start';
+    document.getElementById('btn-start-pause').textContent = '▶ start';
+    fnUnlockTimeDisplay();
     fnSetActiveMode('btn-custom');
 }
 
+function fnUnlockTimeDisplay() {
+    const vTimeEl = document.getElementById('timer-time');
+    vTimeEl.contentEditable = 'true';
+    vTimeEl.focus();
+    const vRange = document.createRange();
+    vRange.selectNodeContents(vTimeEl);
+    const vSel = window.getSelection();
+    vSel.removeAllRanges();
+    vSel.addRange(vRange);
+}
+
+function fnLockTimeDisplay() {
+    document.getElementById('timer-time').contentEditable = 'false';
+}
+
 function fnApplyCustomTime() {
-    const vMinutes = parseInt(document.getElementById('custom-minutes').value);
-    if (vMinutes > 0 && vMinutes <= 180) {
-        vSecondsLeft = vMinutes * 60;
-        vTotalSeconds = vSecondsLeft;
-        fnUpdateDisplay();
+    const vTimeEl = document.getElementById('timer-time');
+    const vText = vTimeEl.textContent.trim();
+    let vTotalSecs = 0;
+
+    if (vText.includes(':')) {
+        const vParts = vText.split(':');
+        vTotalSecs = parseInt(vParts[0]) * 60 + parseInt(vParts[1]);
+    } else {
+        vTotalSecs = parseInt(vText) * 60;
     }
+
+    if (vTotalSecs > 0 && vTotalSecs <= 10800) {
+        vSecondsLeft = vTotalSecs;
+        vTotalSeconds = vTotalSecs;
+    }
+
+    fnLockTimeDisplay();
+    fnUpdateDisplay();
 }
 
 function fnSetActiveMode(vActiveId) {
@@ -138,5 +184,18 @@ function fnToggleFullscreen() {
     document.getElementById('btn-fullscreen').textContent =
         isFullscreen ? 'Exit Full Focus' : 'Full Focus';
 }
+
+document.getElementById('timer-time').addEventListener('keydown', function(vEvent) {
+    if (vEvent.key === 'Enter') {
+        vEvent.preventDefault();
+        fnApplyCustomTime();
+    }
+});
+
+document.getElementById('timer-time').addEventListener('click', function() {
+    if (!isPomodoro && !isRunning) {
+        fnUnlockTimeDisplay();
+    }
+});
 
 fnUpdateDisplay();
