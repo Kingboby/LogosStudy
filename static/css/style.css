@@ -147,8 +147,23 @@
 
 .goals-row-actions button {
     cursor: pointer;
-    padding: 2px 6px;
-    font-size: 12px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+}
+
+.goal-icon {
+    width: 14px;
+    height: 14px;
+    display: block;
+    opacity: 0.6;
+}
+
+.goals-row-actions button:hover .goal-icon {
+    opacity: 1;
 }
 
 .goals-complete .goals-description,
@@ -205,10 +220,39 @@
     box-sizing: border-box;
 }
 
-.goals-add-form button {
-    padding: 6px 14px;
+.goals-add-btn {
+    background: none;
+    border: none;
     cursor: pointer;
-    font-size: 13px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.goals-add-btn:hover .goal-icon-lg {
+    opacity: 1;
+}
+
+.goal-icon-lg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    opacity: 0.6;
+}
+
+.goals-close-btn {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-mid);
+    cursor: pointer;
+    padding: 4px 10px;
 }
 
 .goals-all-list .goals-row {

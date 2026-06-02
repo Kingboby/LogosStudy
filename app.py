@@ -1,6 +1,7 @@
 import os
 import requests
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 from icalendar import Calendar as ICalendar
 from sqlalchemy import func
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, abort, jsonify
@@ -338,7 +339,7 @@ def fnRouteCalendar():
 
             if isinstance(vStart, datetime):
                 if vStart.tzinfo:
-                    vStart = vStart.replace(tzinfo=None)
+                    vStart = vStart.astimezone(ZoneInfo("Australia/Sydney")).replace(tzinfo=None)
                 vStartDate = vStart.date()
                 vDisplayDate = vStart.strftime("%a %d %b")
                 vDisplayTime = vStart.strftime("%H:%M")

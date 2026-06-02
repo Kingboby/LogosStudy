@@ -95,8 +95,8 @@
                     <span class="goal-check">○</span>
                     <span class="goals-description goal-text">{{ vGoal.description }}</span>
                     <div class="goals-row-actions">
-                        <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="Mark complete">✓</button>
-                        <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete">×</button>
+                        <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="Mark complete"><img src="/static/icons/check.svg" class="goal-icon" alt="complete"></button>
+                        <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete"><img src="/static/icons/x.svg" class="goal-icon" alt="delete"></button>
                     </div>
                 </div>
                 {% else %}
@@ -117,19 +117,19 @@
     <div class="goals-fullscreen-inner">
         <div class="goals-fullscreen-header">
             <span>Goals</span>
-            <button onclick="fnCloseGoals()">Close</button>
+            <button class="goals-close-btn" onclick="fnCloseGoals()">Close</button>
         </div>
         <div class="goals-add-form">
             <input type="text" id="goal-input" placeholder="Add a goal..." maxlength="200">
-            <button onclick="fnAddGoal()">Add</button>
+            <button class="goals-add-btn" onclick="fnAddGoal()"><img src="/static/icons/circle-plus.svg" class="goal-icon-lg" alt="add"></button>
         </div>
         <div id="goals-full-list" class="goals-all-list">
             {% for vGoal in tmplAllGoals %}
             <div class="goal-item {% if vGoal.is_complete %}goals-complete{% endif %}" id="goal-{{ vGoal.id }}">
                 <span class="goals-description">{{ vGoal.description }}</span>
                 <div class="goals-row-actions">
-                    <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="{% if vGoal.is_complete %}Mark incomplete{% else %}Mark complete{% endif %}">{% if vGoal.is_complete %}↩{% else %}✓{% endif %}</button>
-                    <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete">×</button>
+                    <button onclick="fnToggleGoalComplete(this, {{ vGoal.id }})" title="{% if vGoal.is_complete %}Mark incomplete{% else %}Mark complete{% endif %}"><img src="/static/icons/{% if vGoal.is_complete %}undo-2{% else %}check{% endif %}.svg" class="goal-icon" alt="{% if vGoal.is_complete %}undo{% else %}complete{% endif %}"></button>
+                    <button onclick="fnDeleteGoal(this, {{ vGoal.id }})" title="Delete"><img src="/static/icons/x.svg" class="goal-icon" alt="delete"></button>
                 </div>
             </div>
             {% endfor %}
@@ -180,7 +180,7 @@ function fnToggleGoalComplete(vBtn, vGoalId) {
             if (vFullItem) {
                 vFullItem.classList.add('goals-complete');
                 const vFullBtn = vFullItem.querySelector('.goals-row-actions button');
-                vFullBtn.textContent = '↩';
+                vFullBtn.innerHTML = '<img src="/static/icons/undo-2.svg" class="goal-icon" alt="undo">';
                 vFullBtn.title = 'Mark incomplete';
             }
             if (vCompactRow) { vCompactRow.remove(); }
@@ -188,7 +188,7 @@ function fnToggleGoalComplete(vBtn, vGoalId) {
             if (vFullItem) {
                 vFullItem.classList.remove('goals-complete');
                 const vFullBtn = vFullItem.querySelector('.goals-row-actions button');
-                vFullBtn.textContent = '✓';
+                vFullBtn.innerHTML = '<img src="/static/icons/check.svg" class="goal-icon" alt="complete">';
                 vFullBtn.title = 'Mark complete';
             }
             if (!vCompactRow) {
@@ -203,8 +203,8 @@ function fnToggleGoalComplete(vBtn, vGoalId) {
                     '<span class="goal-check">○</span>' +
                     '<span class="goals-description goal-text">' + vDescription + '</span>' +
                     '<div class="goals-row-actions">' +
-                    '<button onclick="fnToggleGoalComplete(this, ' + vGoalId + ')" title="Mark complete">&#10003;</button>' +
-                    '<button onclick="fnDeleteGoal(this, ' + vGoalId + ')" title="Delete">&#215;</button>' +
+                    '<button onclick="fnToggleGoalComplete(this, ' + vGoalId + ')" title="Mark complete"><img src="/static/icons/check.svg" class="goal-icon" alt="complete"></button>' +
+                    '<button onclick="fnDeleteGoal(this, ' + vGoalId + ')" title="Delete"><img src="/static/icons/x.svg" class="goal-icon" alt="delete"></button>' +
                     '</div>';
                 vCompactList.appendChild(vNewRow);
             }
@@ -234,8 +234,8 @@ function fnAppendGoalToList(vGoal) {
     vItem.innerHTML =
         '<span class="goals-description">' + vGoal.description + '</span>' +
         '<div class="goals-row-actions">' +
-        '<button onclick="fnToggleGoalComplete(this, ' + vGoal.id + ')" title="Mark complete">&#10003;</button>' +
-        '<button onclick="fnDeleteGoal(this, ' + vGoal.id + ')" title="Delete">&#215;</button>' +
+        '<button onclick="fnToggleGoalComplete(this, ' + vGoal.id + ')" title="Mark complete"><img src="/static/icons/check.svg" class="goal-icon" alt="complete"></button>' +
+        '<button onclick="fnDeleteGoal(this, ' + vGoal.id + ')" title="Delete"><img src="/static/icons/x.svg" class="goal-icon" alt="delete"></button>' +
         '</div>';
     vList.prepend(vItem);
 
@@ -250,8 +250,8 @@ function fnAppendGoalToList(vGoal) {
             '<span class="goal-check">○</span>' +
             '<span class="goals-description goal-text">' + vGoal.description + '</span>' +
             '<div class="goals-row-actions">' +
-            '<button onclick="fnToggleGoalComplete(this, ' + vGoal.id + ')" title="Mark complete">&#10003;</button>' +
-            '<button onclick="fnDeleteGoal(this, ' + vGoal.id + ')" title="Delete">&#215;</button>' +
+            '<button onclick="fnToggleGoalComplete(this, ' + vGoal.id + ')" title="Mark complete"><img src="/static/icons/check.svg" class="goal-icon" alt="complete"></button>' +
+            '<button onclick="fnDeleteGoal(this, ' + vGoal.id + ')" title="Delete"><img src="/static/icons/x.svg" class="goal-icon" alt="delete"></button>' +
             '</div>';
         vCompactList.appendChild(vCompactRow);
     }
