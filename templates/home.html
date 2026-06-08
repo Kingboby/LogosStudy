@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Home — Logos{% endblock %}
+{% block title %}Home - Logos{% endblock %}
 
 {% block content %}
 <div class="dashboard">
@@ -112,7 +112,7 @@
 
 </div>
 
-<!-- Goals fullscreen overlay — unchanged -->
+<!-- Goals fullscreen overlay - unchanged -->
 <div id="goals-fullscreen" class="goals-fullscreen" style="display:none;">
     <div class="goals-fullscreen-inner">
         <div class="goals-fullscreen-header">
@@ -165,6 +165,40 @@ function fnAddGoal() {
     });
 }
 
+function fnFillCompactSlot() {
+    const vCompactList = document.querySelector('.goals-list');
+    if (vCompactList.querySelectorAll('.goals-list-item').length >= 6) return;
+    const lstFullItems = document.querySelectorAll('#goals-full-list .goal-item:not(.goals-complete)');
+    for (let i = 0; i < lstFullItems.length; i++) {
+        const vFullItem = lstFullItems[i];
+        const vGoalId = vFullItem.id.replace('goal-', '');
+        if (!vCompactList.querySelector('[data-goal-id="' + vGoalId + '"]')) {
+            const vDescription = vFullItem.querySelector('.goals-description').textContent;
+            const vEmpty = vCompactList.querySelector('.goals-empty');
+            if (vEmpty) { vEmpty.remove(); }
+            const vNewRow = document.createElement('div');
+            vNewRow.className = 'goals-row goals-list-item';
+            vNewRow.dataset.goalId = vGoalId;
+            vNewRow.innerHTML =
+                '<span class="goal-check">○</span>' +
+                '<span class="goals-description goal-text">' + vDescription + '</span>' +
+                '<div class="goals-row-actions">' +
+                '<button onclick="fnToggleGoalComplete(this, ' + vGoalId + ')" title="Mark complete"><img src="/static/icons/check.svg" class="goal-icon" alt="complete"></button>' +
+                '<button onclick="fnDeleteGoal(this, ' + vGoalId + ')" title="Delete"><img src="/static/icons/x.svg" class="goal-icon" alt="delete"></button>' +
+                '</div>';
+            vCompactList.appendChild(vNewRow);
+            break;
+        }
+    }
+}
+
+function fnUpdateGoalFraction(vCompleteDelta, vTotalDelta) {
+    const vFraction = document.querySelector('.goals-fraction');
+    if (!vFraction) return;
+    const lstParts = vFraction.textContent.split('/').map(function(s) { return parseInt(s.trim(), 10); });
+    vFraction.textContent = (lstParts[0] + vCompleteDelta) + ' / ' + (lstParts[1] + vTotalDelta);
+}
+
 function fnToggleGoalComplete(vBtn, vGoalId) {
     fetch('/goal/complete/' + vGoalId, {
         method: 'POST',
@@ -177,6 +211,7 @@ function fnToggleGoalComplete(vBtn, vGoalId) {
         const vCompactRow = document.querySelector('.goals-list [data-goal-id="' + vGoalId + '"]');
 
         if (vData.is_complete) {
+            fnUpdateGoalFraction(1, 0);
             if (vFullItem) {
                 vFullItem.classList.add('goals-complete');
                 const vFullBtn = vFullItem.querySelector('.goals-row-actions button');
@@ -184,7 +219,9 @@ function fnToggleGoalComplete(vBtn, vGoalId) {
                 vFullBtn.title = 'Mark incomplete';
             }
             if (vCompactRow) { vCompactRow.remove(); }
+            fnFillCompactSlot();
         } else {
+            fnUpdateGoalFraction(-1, 0);
             if (vFullItem) {
                 vFullItem.classList.remove('goals-complete');
                 const vFullBtn = vFullItem.querySelector('.goals-row-actions button');
@@ -220,13 +257,18 @@ function fnDeleteGoal(vBtn, vGoalId) {
     .then(function(vResponse) { return vResponse.json(); })
     .then(function() {
         const vFullItem = document.getElementById('goal-' + vGoalId);
+        const isWasComplete = vFullItem && vFullItem.classList.contains('goals-complete');
         if (vFullItem) { vFullItem.remove(); }
         const vCompactRow = document.querySelector('.goals-list [data-goal-id="' + vGoalId + '"]');
+        const isWasInCompact = !!vCompactRow;
         if (vCompactRow) { vCompactRow.remove(); }
+        fnUpdateGoalFraction(isWasComplete ? -1 : 0, -1);
+        if (isWasInCompact && !isWasComplete) { fnFillCompactSlot(); }
     });
 }
 
 function fnAppendGoalToList(vGoal) {
+    fnUpdateGoalFraction(0, 1);
     const vList = document.getElementById('goals-full-list');
     const vItem = document.createElement('div');
     vItem.className = 'goal-item';
@@ -242,7 +284,8 @@ function fnAppendGoalToList(vGoal) {
     const vCompactList = document.querySelector('.goals-list');
     const vEmpty = vCompactList.querySelector('.goals-empty');
     if (vEmpty) { vEmpty.remove(); }
-    if (!vCompactList.querySelector('[data-goal-id="' + vGoal.id + '"]')) {
+    const vCompactCount = vCompactList.querySelectorAll('.goals-list-item').length;
+    if (!vCompactList.querySelector('[data-goal-id="' + vGoal.id + '"]') && vCompactCount < 6) {
         const vCompactRow = document.createElement('div');
         vCompactRow.className = 'goals-row goals-list-item';
         vCompactRow.dataset.goalId = vGoal.id;

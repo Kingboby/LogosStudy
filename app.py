@@ -97,7 +97,7 @@ def fnRouteDashboard():
         Goal.query
         .filter_by(user_id=current_user.id, is_complete=False)
         .order_by(Goal.created_at.desc())
-        .limit(5)
+        .limit(6)
         .all()
     )
     lstAllGoals = (
