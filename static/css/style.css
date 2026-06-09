@@ -27,6 +27,11 @@
     --shadow-tile: 0 1px 0 rgba(0,0,0,0.04), 0 14px 30px -18px rgba(0,0,0,0.18);
 }
 
+/* Global scale — reproduces the 150% browser zoom the UI was designed at */
+body {
+    zoom: 1.5;
+}
+
 .activity-graph {
     overflow-x: auto;
     margin-bottom: 16px;
