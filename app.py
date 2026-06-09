@@ -9,10 +9,13 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db, loginManager
 from models import User, StudySession, Goal
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///logos.db"
-app.config["SECRET_KEY"] = "dev-secret-key"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
 db.init_app(app)
 loginManager.init_app(app)
