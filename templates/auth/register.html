@@ -3,20 +3,27 @@
 {% block title %}Register - Logos{% endblock %}
 
 {% block content %}
-    <h1>Register</h1>
-    {% if tmplError %}
+<div class="auth">
+    <div class="auth-card">
+        <h1 class="auth-title">Register</h1>
+
+        {% if tmplError %}
         <p class="form-error">{{ tmplError }}</p>
-    {% endif %}
-    <form method="POST" action="/register">
-        <div>
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div>
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Register</button>
-    </form>
-    <p><a href="/login">Already have an account? Log in</a></p>
+        {% endif %}
+
+        <form class="auth-form" method="POST" action="/register">
+            <label class="auth-field">
+                <span class="auth-label">Username</span>
+                <input type="text" name="username" required autofocus>
+            </label>
+            <label class="auth-field">
+                <span class="auth-label">Password</span>
+                <input type="password" name="password" required>
+            </label>
+            <button type="submit" class="auth-submit">Register</button>
+        </form>
+
+        <p class="auth-alt"><a href="/login">Already have an account? Log in</a></p>
+    </div>
+</div>
 {% endblock %}

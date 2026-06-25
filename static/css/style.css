@@ -170,8 +170,8 @@ body {
 .goals-fullscreen {
     position: fixed;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
+    width: calc(100vw / 1.5);
+    height: calc(100vh / 1.5);
     background: white;
     z-index: 1000;
     display: flex;
@@ -331,8 +331,10 @@ body {
 .timer-fullscreen {
     position: fixed;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
+    /* Divided by 1.5 to cancel out body { zoom: 1.5 }, otherwise the overlay
+       renders at 150vw x 150vh and spills off the screen. */
+    width: calc(100vw / 1.5);
+    height: calc(100vh / 1.5);
     background: var(--paper-2);
     z-index: 1000;
     display: flex;
@@ -508,7 +510,8 @@ main {
     margin-bottom: 10px;
 }
 
-.cal-input {
+.cal-input,
+.auth-form input {
     flex: 1;
     padding: 7px 10px;
     font-size: 11px;
@@ -520,7 +523,8 @@ main {
     min-width: 0;
 }
 
-.cal-save-btn {
+.cal-save-btn,
+.auth-submit {
     padding: 7px 12px;
     font-size: 11px;
     font-weight: 500;
@@ -867,8 +871,10 @@ main {
 /* Welcome / entry screen */
 
 .welcome {
-    margin: 0 !important;   
-    min-height: 100vh;
+    margin: 0 !important;
+    /* Exactly one screen, no scroll. Divided by 1.5 to cancel out body { zoom: 1.5 }. */
+    height: calc(100vh / 1.5);
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -918,4 +924,101 @@ main {
 .welcome-enter:hover {
     background: var(--ink-2);
     border-color: var(--ink-2);
+}
+
+/* Auth — login & register (shared layout; inputs/buttons reuse .cal-input / .cal-save-btn) */
+
+/* Remove the default body margin on auth pages only — otherwise it nudges
+   the single-screen layout past the viewport and causes a tiny scroll. */
+body:has(.auth) {
+    margin: 0;
+}
+
+.auth {
+    min-height: calc(100vh / 1.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.auth-title {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--ink);
+    margin: 0 0 4px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.auth-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+}
+
+.auth-submit {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.auth-alt {
+    font-size: 11px;
+    color: var(--ink-mid);
+    margin: 4px 0 0;
+}
+
+.auth-alt a {
+    color: var(--ink-2);
+}
+
+/* Profile — minimal type styling so fonts match the rest of the site */
+
+.profile-name {
+    font-family: var(--serif);
+    font-weight: 400;
+    color: var(--ink);
+}
+
+.profile-stat-card {
+    margin-bottom: 10px;
+    margin-left: 10px;
+}
+
+.profile-stat-number {
+    display: block;
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--ink);
+}
+
+.profile-stat-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
 }

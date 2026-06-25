@@ -67,7 +67,18 @@ def fnBuildActivityGrid(dctSessionCounts):
 
         lstWeeks.append(lstWeek)
 
-    return lstWeeks, lstMonthLabels
+    # Drop a month label when the next one sits too close horizontally. This
+    # removes the leading partial month (e.g. "Dec") overlapping the next month
+    # (e.g. "Jan") when the graph starts mid-month and both land on column 0.
+    vMinLabelGap = 3
+    lstSpacedLabels = []
+    for vLabelIndex, vMonthLabel in enumerate(lstMonthLabels):
+        isLastLabel = vLabelIndex == len(lstMonthLabels) - 1
+        if not isLastLabel and lstMonthLabels[vLabelIndex + 1]["col"] - vMonthLabel["col"] < vMinLabelGap:
+            continue
+        lstSpacedLabels.append(vMonthLabel)
+
+    return lstWeeks, lstSpacedLabels
 
 
 @app.route("/")
