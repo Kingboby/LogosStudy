@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Calendar | Logos{% endblock %}
+{% block title %}Calendar - Logos{% endblock %}
 
 {% block content %}
 <div class="cal-head">
@@ -9,7 +9,7 @@
         {% if tmplShowSetup %}
         <h3 class="cal-title">Connect your calendar.</h3>
         {% else %}
-        <h3 class="cal-title">Upcoming events.</h3>
+        <h3 class="cal-title">Today.</h3>
         {% endif %}
     </div>
     {% if not tmplShowSetup %}
@@ -47,7 +47,7 @@
         {% endfor %}
     </ul>
     {% else %}
-    <p class="cal-empty">No upcoming events.</p>
+    <p class="cal-empty">No events today.</p>
     {% endif %}
     {% endif %}
 </div>

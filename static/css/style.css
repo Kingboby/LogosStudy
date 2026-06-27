@@ -27,7 +27,7 @@
     --shadow-tile: 0 1px 0 rgba(0,0,0,0.04), 0 14px 30px -18px rgba(0,0,0,0.18);
 }
 
-/* Global scale — reproduces the 150% browser zoom the UI was designed at */
+/* Global scale - reproduces the 150% browser zoom the UI was designed at */
 body {
     zoom: 1.5;
 }
@@ -584,6 +584,7 @@ main {
     font-family: var(--serif);
     font-size: 14px;
     color: var(--ink-soft);
+    text-align: center;
     margin: 20px 0 0;
 }
 
@@ -926,9 +927,9 @@ main {
     border-color: var(--ink-2);
 }
 
-/* Auth — login & register (shared layout; inputs/buttons reuse .cal-input / .cal-save-btn) */
+/* Auth - login & register (shared layout; inputs/buttons reuse .cal-input / .cal-save-btn) */
 
-/* Remove the default body margin on auth pages only — otherwise it nudges
+/* Remove the default body margin on auth pages only - otherwise it nudges
    the single-screen layout past the viewport and causes a tiny scroll. */
 body:has(.auth) {
     margin: 0;
@@ -995,7 +996,7 @@ body:has(.auth) {
     color: var(--ink-2);
 }
 
-/* Profile — minimal type styling so fonts match the rest of the site */
+/* Profile - minimal type styling so fonts match the rest of the site */
 
 .profile-name {
     font-family: var(--serif);

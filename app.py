@@ -362,7 +362,7 @@ def fnRouteCalendar():
                 vDisplayDate = vStart.strftime("%a %d %b")
                 vDisplayTime = "all day"
 
-            if vStartDate < vToday:
+            if vStartDate != vToday:
                 continue
 
             lstEvents.append({
