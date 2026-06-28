@@ -130,29 +130,6 @@ def fnRouteDashboard():
         vGreeting = "Good evening"
 
     vDateDisplay = vToday.strftime("%a").upper() + " " + str(vToday.day) + " " + vToday.strftime("%b").upper()
-    vWeekNum = vToday.isocalendar()[1]
-
-    vFourteenDaysAgo = vToday - timedelta(days=13)
-    lstLast14Raw = (
-        db.session.query(
-            func.date(StudySession.date).label("session_date"),
-            func.count(StudySession.id).label("session_count")
-        )
-        .filter(StudySession.user_id == current_user.id)
-        .filter(StudySession.date >= vFourteenDaysAgo)
-        .group_by(func.date(StudySession.date))
-        .all()
-    )
-    dctLast14Counts = {str(row.session_date): row.session_count for row in lstLast14Raw}
-    lstLast14Days = []
-    for vDayOffset in range(13, -1, -1):
-        vDayDate = vToday - timedelta(days=vDayOffset)
-        vDayStr = vDayDate.strftime("%Y-%m-%d")
-        vDayCount = dctLast14Counts.get(vDayStr, 0)
-        lstLast14Days.append({
-            "date": vDayStr,
-            "css_class": "day-" + str(min(vDayCount, 3))
-        })
 
     vGoalTotalCount = Goal.query.filter_by(user_id=current_user.id).count()
     vGoalCompleteCount = Goal.query.filter_by(user_id=current_user.id, is_complete=True).count()
@@ -165,10 +142,8 @@ def fnRouteDashboard():
         tmplAllGoals=lstAllGoals,
         tmplUsername=current_user.username,
         tmplLongestStreak=current_user.longest_streak,
-        tmplLast14Days=lstLast14Days,
         tmplGreeting=vGreeting,
         tmplDateStr=vDateDisplay,
-        tmplWeekNum=vWeekNum,
         tmplGoalTotalCount=vGoalTotalCount,
         tmplGoalCompleteCount=vGoalCompleteCount
     )
@@ -418,6 +393,17 @@ def fnRouteProfile():
 @app.route("/offline")
 def fnRouteOffline():
     return render_template("offline.html")
+
+
+@app.route("/service-worker.js")
+def fnRouteServiceWorker():
+    # Served from the root so the service worker's scope covers the whole app,
+    # letting it intercept page navigations and fall back to /offline.
+    return send_from_directory(
+        os.path.join("static", "js"),
+        "service-worker.js",
+        mimetype="application/javascript"
+    )
 
 
 with app.app_context():

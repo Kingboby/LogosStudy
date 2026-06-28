@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Logos{% endblock %}</title>
+    <link rel="icon" href="/static/icons/logo.svg" type="image/svg+xml">
+    <link rel="manifest" href="/static/manifest.json">
     <link rel="stylesheet" href="/static/css/style.css">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
     <nav class="rail">
-        <strong>L</strong>
+        <img class="rail-logo" src="/static/icons/logo.svg" width="25" height="25" alt="Logos">
         <ul>
             <li><a href="/home" {% if request.path == '/home' %}class="active"{% endif %}><img src="/static/icons/house.svg" width="18" height="18"></a></li>
             <li><a href="/library" {% if request.path.startswith('/library') %}class="active"{% endif %}><img src="/static/icons/library.svg" width="18" height="18"></a></li>
@@ -27,5 +29,11 @@
     </main>
 
     {% block extra_js %}{% endblock %}
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/service-worker.js");
+        }
+    </script>
 </body>
 </html>

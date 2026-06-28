@@ -3,50 +3,64 @@
 {% block title %}Library - Logos{% endblock %}
 
 {% block content %}
-    <h1>Library</h1>
+<div class="lib-content">
+    <h1 class="lib-title">Library</h1>
 
-    <p>
+    <p class="lib-breadcrumbs">
         <a href="/library">Library</a>
         {% if tmplSubPath %}
             {% for vPart in tmplSubPath.split("/") %}
                 {% set vCrumbPath = tmplSubPath.split("/")[:loop.index] | join("/") %}
-                / <a href="/library/{{ vCrumbPath }}">{{ vPart }}</a>
+                <span class="lib-crumb-sep">/</span> <a href="/library/{{ vCrumbPath }}">{{ vPart }}</a>
             {% endfor %}
         {% endif %}
     </p>
 
     {% if not tmplIsAtRoot %}
         {% if tmplParentPath %}
-            <p><a href="/library/{{ tmplParentPath }}">← Back</a></p>
+            <a class="lib-back" href="/library/{{ tmplParentPath }}">
+                <img class="lib-back-icon" src="/static/icons/arrow-left.svg" width="13" height="13" alt="">
+                Back
+            </a>
         {% else %}
-            <p><a href="/library">← Back</a></p>
+            <a class="lib-back" href="/library">
+                <img class="lib-back-icon" src="/static/icons/arrow-left.svg" width="13" height="13" alt="">
+                Back
+            </a>
         {% endif %}
     {% endif %}
 
     {% if tmplFolders %}
-        <p>Folders</p>
-        <ul>
+        <p class="lib-section">Folders</p>
+        <ul class="lib-list">
             {% for vFolder in tmplFolders %}
-            <li>
-                <a href="/library/{{ tmplSubPath ~ '/' ~ vFolder if tmplSubPath else vFolder }}">{{ vFolder }}/</a>
+            <li class="lib-item lib-item-folder">
+                <a class="lib-link" href="/library/{{ tmplSubPath ~ '/' ~ vFolder if tmplSubPath else vFolder }}">
+                    <img class="lib-icon" src="/static/icons/folder.svg" width="16" height="16" alt="">
+                    <span class="lib-name">{{ vFolder }}</span>
+                </a>
             </li>
             {% endfor %}
         </ul>
     {% endif %}
 
     {% if tmplFiles %}
-        <p>Files</p>
-        <ul>
+        <p class="lib-section">Files</p>
+        <ul class="lib-list">
             {% for vFile in tmplFiles %}
-            <li>
-                {{ vFile }}
-                <a href="/download/{{ tmplSubPath ~ '/' ~ vFile if tmplSubPath else vFile }}">Download</a>
+            <li class="lib-item">
+                <span class="lib-link">
+                    <img class="lib-icon" src="/static/icons/file-text.svg" width="16" height="16" alt="">
+                    <span class="lib-name">{{ vFile }}</span>
+                </span>
+                <a class="lib-download" href="/download/{{ tmplSubPath ~ '/' ~ vFile if tmplSubPath else vFile }}">Download</a>
             </li>
             {% endfor %}
         </ul>
     {% endif %}
 
     {% if not tmplFolders and not tmplFiles %}
-        <p>This folder is empty.</p>
+        <p class="lib-empty">This folder is empty.</p>
     {% endif %}
+</div>
 {% endblock %}

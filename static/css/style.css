@@ -244,10 +244,6 @@ body {
     padding: 4px 10px;
 }
 
-.goals-all-list .goals-row {
-    font-size: 13px;
-}
-
 /* --- Moved from timer.css --- */
 
 .timer-modes {
@@ -273,53 +269,6 @@ body {
     background: var(--ink);
     color: var(--paper-2);
     border-color: var(--ink);
-}
-
-#custom-input {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-#custom-minutes {
-    flex: 1;
-    padding: 5px 8px;
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.04em;
-    border: 1px solid var(--line);
-    border-radius: var(--r-md);
-    background: var(--paper-2);
-    color: var(--ink);
-    min-width: 0;
-}
-
-#custom-input button {
-    padding: 5px 10px;
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--ink-2);
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-#timer-time {
-    display: block;
-    font-size: 45px;
-    letter-spacing: 0.02em;
-    line-height: 1;
-}
-
-#timer-label {
-    display: block;
-    font-size: 13px;
-    color: #666;
-    margin-top: 4px;
 }
 
 #btn-fullscreen {
@@ -348,8 +297,7 @@ body {
 }
 
 .timer-fullscreen .dash-card-label,
-.timer-fullscreen .timer-modes,
-.timer-fullscreen #custom-input {
+.timer-fullscreen .timer-modes {
     display: none !important;
 }
 
@@ -397,20 +345,10 @@ nav.rail {
     z-index: 100;
 }
 
-nav.rail strong {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--ink);
-    color: var(--paper-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--serif);
-    font-size: 14px;
-    font-style: italic;
-    font-weight: 400;
-    line-height: 1;
+nav.rail .rail-logo {
+    width: 25px;
+    height: 25px;
+    display: block;
 }
 
 nav.rail ul {
@@ -1022,4 +960,193 @@ body:has(.auth) {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--ink-mid);
+}
+
+/* Library - file explorer */
+
+.lib-content {
+    padding: 10px 14px;
+}
+
+.lib-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 0 0 8px;
+}
+
+.lib-breadcrumbs {
+    font-size: 11px;
+    color: var(--ink-mid);
+    margin: 0 0 12px;
+}
+
+.lib-breadcrumbs a {
+    color: var(--ink-2);
+    text-decoration: none;
+}
+
+.lib-breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.lib-crumb-sep {
+    color: var(--ink-soft);
+    margin: 0 2px;
+}
+
+.lib-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--ink-2);
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--paper-2);
+    margin-bottom: 14px;
+    transition: background 120ms ease-out;
+}
+
+.lib-back:hover {
+    background: var(--paper);
+}
+
+.lib-back-icon {
+    display: block;
+}
+
+.lib-section {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    margin: 0 0 6px;
+}
+
+.lib-list {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+}
+
+.lib-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--paper-2);
+    margin-bottom: 6px;
+    transition: background 120ms ease-out;
+}
+
+.lib-item:hover {
+    background: var(--paper);
+}
+
+/* Folders: move the padding onto the link so the whole box is clickable */
+.lib-item-folder {
+    padding: 0;
+}
+
+.lib-item-folder .lib-link {
+    padding: 9px 12px;
+}
+
+.lib-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.lib-icon {
+    display: block;
+    flex-shrink: 0;
+}
+
+.lib-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lib-download {
+    flex-shrink: 0;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-2);
+    background: transparent;
+    text-decoration: none;
+    transition: background 120ms ease-out;
+}
+
+.lib-download:hover {
+    background: var(--canvas);
+}
+
+.lib-empty {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 20px 0 0;
+}
+
+/* Offline fallback page (standalone, served by the service worker) */
+
+.offline-body {
+    zoom: 1;
+    margin: 0;
+}
+
+.offline-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    background: var(--canvas);
+}
+
+.offline-logo {
+    width: 56px;
+    height: 56px;
+}
+
+.offline-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 32px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 0;
+}
+
+.offline-text {
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-mid);
+    max-width: 280px;
+    margin: 0;
 }
