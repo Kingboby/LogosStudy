@@ -4,5 +4,6 @@ flask-login
 flask-wtf
 werkzeug
 icalendar
+recurring-ical-events
 requests
 python-dotenv

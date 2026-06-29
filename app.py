@@ -1,5 +1,6 @@
 import os
 import requests
+import recurring_ical_events
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 from icalendar import Calendar as ICalendar
@@ -318,9 +319,12 @@ def fnRouteCalendar():
         vResponse.raise_for_status()
         vCal = ICalendar.from_ical(vResponse.content)
 
-        for vComponent in vCal.walk():
-            if vComponent.name != "VEVENT":
-                continue
+        # Expand recurring events. .at(vToday) returns every occurrence that
+        # lands on today's date, including RRULE repeats, so a recurring event
+        # shows on each day it recurs rather than only on its original start.
+        lstOccurrences = recurring_ical_events.of(vCal).at(vToday)
+
+        for vComponent in lstOccurrences:
             vDtstart = vComponent.get("DTSTART")
             if vDtstart is None:
                 continue
@@ -329,16 +333,11 @@ def fnRouteCalendar():
             if isinstance(vStart, datetime):
                 if vStart.tzinfo:
                     vStart = vStart.astimezone(ZoneInfo("Australia/Sydney")).replace(tzinfo=None)
-                vStartDate = vStart.date()
                 vDisplayDate = vStart.strftime("%a %d %b")
                 vDisplayTime = vStart.strftime("%H:%M")
             else:
-                vStartDate = vStart
                 vDisplayDate = vStart.strftime("%a %d %b")
                 vDisplayTime = "all day"
-
-            if vStartDate != vToday:
-                continue
 
             lstEvents.append({
                 "title": str(vComponent.get("SUMMARY", "Untitled event")),
