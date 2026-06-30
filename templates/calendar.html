@@ -3,6 +3,7 @@
 {% block title %}Calendar - Logos{% endblock %}
 
 {% block content %}
+<!-- header, title changes between setup prompt "today" -->
 <div class="cal-head">
     <div>
         <p class="cal-eyebrow">Calendar</p>
@@ -22,6 +23,7 @@
     <p class="cal-error">{{ tmplError }}</p>
     {% endif %}
 
+    <!-- setup, form to paste link -->
     {% if tmplShowSetup %}
     <p class="cal-hint">Paste your .ics calendar link to get started.</p>
     <form class="cal-form" action="/calendar/save-url" method="POST">
@@ -29,6 +31,7 @@
         <button class="cal-save-btn" type="submit">Save</button>
     </form>
 
+    <!-- change url form -->
     {% else %}
     <div class="cal-form-wrap" id="calChangeForm">
         <form class="cal-form" action="/calendar/save-url" method="POST">
@@ -54,6 +57,7 @@
 
 {% if not tmplShowSetup %}
 <script>
+  // show / hide change calendar url form
 function fnToggleChangeForm() {
     document.getElementById("calChangeForm").classList.toggle("is-visible");
 }

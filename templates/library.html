@@ -6,6 +6,7 @@
 <div class="lib-content">
     <h1 class="lib-title">Library</h1>
 
+    <!-- breadcrumb trail built from the current path -->
     <p class="lib-breadcrumbs">
         <a href="/library">Library</a>
         {% if tmplSubPath %}
@@ -16,6 +17,7 @@
         {% endif %}
     </p>
 
+    <!-- back link to the parent folder -->
     {% if not tmplIsAtRoot %}
         {% if tmplParentPath %}
             <a class="lib-back" href="/library/{{ tmplParentPath }}">
@@ -30,6 +32,7 @@
         {% endif %}
     {% endif %}
 
+    <!-- folders in this directory -->
     {% if tmplFolders %}
         <p class="lib-section">Folders</p>
         <ul class="lib-list">
@@ -43,7 +46,7 @@
             {% endfor %}
         </ul>
     {% endif %}
-
+    <!-- downloadable files in this directory -->
     {% if tmplFiles %}
         <p class="lib-section">Files</p>
         <ul class="lib-list">
@@ -58,7 +61,7 @@
             {% endfor %}
         </ul>
     {% endif %}
-
+    <!-- empty folder fallback -->
     {% if not tmplFolders and not tmplFiles %}
         <p class="lib-empty">This folder is empty.</p>
     {% endif %}

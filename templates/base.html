@@ -11,6 +11,7 @@
 </head>
 <body>
 
+    <!-- Sidebar nav rail, logo, page links (active highlighted), logout -->
     <nav class="rail">
         <img class="rail-logo" src="/static/icons/logo.svg" width="25" height="25" alt="Logos">
         <ul>
@@ -24,12 +25,14 @@
         </a>
     </nav>
 
+    <!-- Page widgets by other templates -->
     <main>
         {% block content %}{% endblock %}
     </main>
 
     {% block extra_js %}{% endblock %}
 
+    <!-- Register the service worker so the app works offline -->
     <script>
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("/service-worker.js");

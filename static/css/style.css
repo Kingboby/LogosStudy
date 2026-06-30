@@ -27,11 +27,12 @@
     --shadow-tile: 0 1px 0 rgba(0,0,0,0.04), 0 14px 30px -18px rgba(0,0,0,0.18);
 }
 
-/* Global scale - reproduces the 150% browser zoom the UI was designed at */
+/* Global scale - accidentally created the website at 150% zoom so fixes this */
 body {
     zoom: 1.5;
 }
 
+/* heatmap graph - 26 week grid of study session tiles with month/day labels */
 .activity-graph {
     overflow-x: auto;
     margin-bottom: 16px;
@@ -96,18 +97,18 @@ body {
     height: 12px;
     border-radius: 2px;
 }
-
+/* heatmap shade levels 0 - 3 changing colour */
 .day-0 { background: #ebedf0; }
 .day-1 { background: #9be9a8; }
 .day-2 { background: #40c463; }
 .day-3 { background: #216e39; }
-
+/* form error message login/register */
 .form-error {
     color: #c0392b;
     font-size: 13px;
     margin-bottom: 12px;
 }
-
+/* goal list rows, action buttons and completed */
 .goals-list {
     min-height: 20px;
 }
@@ -166,7 +167,7 @@ body {
     color: #999;
     margin: 0;
 }
-
+/* fullscreen goals editor overlay (add / complete / delete) */
 .goals-fullscreen {
     position: fixed;
     inset: 0;
@@ -245,7 +246,7 @@ body {
 }
 
 /* --- Moved from timer.css --- */
-
+/* pomodoro / custom mode toggle buttons */
 .timer-modes {
     display: flex;
     gap: 6px;
@@ -276,7 +277,7 @@ body {
     cursor: pointer;
     font-size: 12px;
 }
-
+/* full focus fullscreen timer view and enlarged ring/text */
 .timer-fullscreen {
     position: fixed;
     inset: 0;
@@ -334,7 +335,9 @@ nav.rail {
     left: 0;
     top: 0;
     width: 44px;
-    height: 100vh;
+    /* Divided by 1.5 to cancel out body { zoom: 1.5 }, otherwise the rail
+       renders at 150vh and pushes the logout button off the bottom. */
+    height: calc(100vh / 1.5);
     background: var(--paper);
     border-right: 1px solid var(--line-soft);
     display: flex;
@@ -571,6 +574,20 @@ main {
     align-items: stretch;
 }
 
+/* Mobile: stack the dashboard widgets in one column.  */
+@media (max-width: 640px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+    /* min-width:0 overrides the grid item's default min-width:auto so cards
+       can shrink narrower than the heatmap. The heatmap's overflow-x:auto
+       then scrolls horizontally instead of forcing the widget wide. */
+    .dash-card {
+        min-width: 0;
+    }
+}
+
 .dash-card {
     background: var(--paper-2);
     border: 1px solid var(--line-soft);
@@ -791,6 +808,7 @@ main {
     margin-bottom: 0;
 }
 
+/* logout button pinned to bottom of rail */
 .logout-btn {
     width: 30px;
     height: 30px;
@@ -867,8 +885,7 @@ main {
 
 /* Auth - login & register (shared layout; inputs/buttons reuse .cal-input / .cal-save-btn) */
 
-/* Remove the default body margin on auth pages only - otherwise it nudges
-   the single-screen layout past the viewport and causes a tiny scroll. */
+/* Remove the default body margin on auth pages only */
 body:has(.auth) {
     margin: 0;
 }
@@ -1052,7 +1069,7 @@ body:has(.auth) {
     background: var(--paper);
 }
 
-/* Folders: move the padding onto the link so the whole box is clickable */
+/* Folders - move the padding onto the link so the whole box is clickable */
 .lib-item-folder {
     padding: 0;
 }

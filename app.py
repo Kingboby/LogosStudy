@@ -23,12 +23,12 @@ loginManager.init_app(app)
 
 LIBRARY_ROOT = os.path.join("static", "library")
 
-
+# flask login, reloads the logged in user from stored id
 @loginManager.user_loader
 def fnLoadUser(vUserId):
     return User.query.get(int(vUserId))
 
-
+# returns the subfolders and files inside a folder, sorted alphabetically
 def fnScanFolder(vFolderPath):
     lstFolders = []
     lstFiles = []
@@ -42,9 +42,12 @@ def fnScanFolder(vFolderPath):
             lstFiles.append(vItem)
     return lstFolders, lstFiles
 
+# builds he 26 week heatmap, from todays date. lists in lstWeeks
 
 def fnBuildActivityGrid(dctSessionCounts):
     vToday = date.today()
+    # makes sure the grid has whole weeks, ends ont he sunday of current weeks
+    # then goes back 6 weeks so each column is monday -> sunday
     vEndDate = vToday + timedelta(days=(6 - vToday.weekday()))
     vStartDate = vEndDate - timedelta(days=181)
 
@@ -58,6 +61,7 @@ def fnBuildActivityGrid(dctSessionCounts):
             vDate = vStartDate + timedelta(weeks=vWeekIndex, days=vDayIndex)
             vDateStr = vDate.strftime("%Y-%m-%d")
             vCount = dctSessionCounts.get(vDateStr, 0) if vDate <= vToday else 0
+            #shade level cap at 3 so 3+ sessions all shaded same
             vCssClass = "day-" + str(min(vCount, 3))
             lstWeek.append({"date": vDateStr, "count": vCount, "css_class": vCssClass})
 
@@ -68,9 +72,8 @@ def fnBuildActivityGrid(dctSessionCounts):
 
         lstWeeks.append(lstWeek)
 
-    # Drop a month label when the next one sits too close horizontally. This
-    # removes the leading partial month (e.g. "Dec") overlapping the next month
-    # (e.g. "Jan") when the graph starts mid-month and both land on column 0.
+    # fix month label issue, months too close one will be dropped, removes
+    # partial month overlapping next month
     vMinLabelGap = 3
     lstSpacedLabels = []
     for vLabelIndex, vMonthLabel in enumerate(lstMonthLabels):
@@ -81,13 +84,14 @@ def fnBuildActivityGrid(dctSessionCounts):
 
     return lstWeeks, lstSpacedLabels
 
-
+# pre login landing screen with Enter logos button
 @app.route("/")
 @app.route("/welcome")
 def fnRouteWelcome():
     return render_template("welcome.html")
 
-
+# study dashboard, queries database for info on streak, heatmap, goals
+# and calculates greeting for the home page
 @app.route("/home")
 @login_required
 def fnRouteDashboard():
@@ -121,7 +125,7 @@ def fnRouteDashboard():
         .order_by(Goal.is_complete.asc(), Goal.created_at.desc())
         .all()
     )
-
+    # pick greeting based on hour of day
     vHour = datetime.now().hour
     if vHour < 12:
         vGreeting = "Good morning"
@@ -135,8 +139,15 @@ def fnRouteDashboard():
     vGoalTotalCount = Goal.query.filter_by(user_id=current_user.id).count()
     vGoalCompleteCount = Goal.query.filter_by(user_id=current_user.id, is_complete=True).count()
 
+    # A streak is only alive if the last study day was today or yesterday.
+    # If it was more than 1 day ago (or never), the streak is broken -> display 0
+    if current_user.last_active is None or (vToday - current_user.last_active).days > 1:
+        vDisplayStreak = 0
+    else:
+        vDisplayStreak = current_user.streak
+
     return render_template("home.html",
-        tmplStreak=current_user.streak,
+        tmplStreak=vDisplayStreak,
         tmplActivityGrid=lstActivityGrid,
         tmplMonthLabels=lstMonthLabels,
         tmplIncompleteGoals=lstIncompleteGoals,
@@ -149,7 +160,8 @@ def fnRouteDashboard():
         tmplGoalCompleteCount=vGoalCompleteCount
     )
 
-
+# creates new account (unique username needed) password is hashed
+# user is auto logged in after creating account
 @app.route("/register", methods=["GET", "POST"])
 def fnRouteRegister():
     if request.method == "POST":
@@ -170,7 +182,7 @@ def fnRouteRegister():
 
     return render_template("auth/register.html")
 
-
+# rehash password, then verifies submission against stored user data. logs in if correct
 @app.route("/login", methods=["GET", "POST"])
 def fnRouteLogin():
     if request.method == "POST":
@@ -185,14 +197,14 @@ def fnRouteLogin():
             tmplError="Incorrect username or password.")
     return render_template("auth/login.html")
 
-
+# ends the session and sends the user back to login page.
 @app.route("/logout")
 @login_required
 def fnRouteLogout():
     logout_user()
     return redirect(url_for("fnRouteLogin"))
 
-
+# records a finished study session (called by the timer) and updates the streak counters
 @app.route("/save-session", methods=["POST"])
 @login_required
 def fnRouteSaveSession():
@@ -210,6 +222,10 @@ def fnRouteSaveSession():
     vToday = date.today()
     vLastActive = current_user.last_active
 
+    #updates the streak based on gap since last study day
+    # a gap of more than 1 day or no prior restarts at 1
+    # exactly one day gap extendsthe streak. same day leave as is
+
     if vLastActive is None or (vToday - vLastActive).days > 1:
         current_user.streak = 1
     elif (vToday - vLastActive).days == 1:
@@ -222,7 +238,7 @@ def fnRouteSaveSession():
 
     return jsonify({"streak": current_user.streak})
 
-
+# adds a goal for the current user and returns it as JSON for front end render
 @app.route("/goal/add", methods=["POST"])
 @login_required
 def fnRouteAddGoal():
@@ -239,7 +255,7 @@ def fnRouteAddGoal():
         "is_complete": dbGoal.is_complete
     })
 
-
+# changes a goals complete/incomplete state, after checking if it belongs to current user
 @app.route("/goal/complete/<int:vGoalId>", methods=["POST"])
 @login_required
 def fnRouteGoalComplete(vGoalId):
@@ -250,7 +266,7 @@ def fnRouteGoalComplete(vGoalId):
     db.session.commit()
     return jsonify({"id": dbGoal.id, "is_complete": dbGoal.is_complete})
 
-
+# deletes a goal, after checking it belongs to a current user
 @app.route("/goal/delete/<int:vGoalId>", methods=["POST"])
 @login_required
 def fnRouteDeleteGoal(vGoalId):
@@ -261,11 +277,14 @@ def fnRouteDeleteGoal(vGoalId):
     db.session.commit()
     return jsonify({"deleted": vGoalId})
 
-
+# browses the curated resource library, listing the folders and files at the requested sub path
 @app.route("/library")
 @app.route("/library/<path:vSubPath>")
 @login_required
 def fnRouteLibrary(vSubPath=""):
+    # resolve the requested path and confirm it stays inside library isAtRoot
+    # resolving with realpath first defeats attempts that would otherwise reach outside
+    # static/library
     vRealRoot = os.path.realpath(LIBRARY_ROOT)
     vRealPath = os.path.realpath(os.path.join(LIBRARY_ROOT, vSubPath))
 
@@ -289,10 +308,11 @@ def fnRouteLibrary(vSubPath=""):
         tmplCurrentFolder=os.path.basename(vSubPath) if vSubPath else "Library"
     )
 
-
+# sends a library file to the browser as a download
 @app.route("/download/<path:vFilePath>")
 @login_required
 def fnRouteDownload(vFilePath):
+    # same path guard as library route
     vRealRoot = os.path.realpath(LIBRARY_ROOT)
     vRealFile = os.path.realpath(os.path.join(LIBRARY_ROOT, vFilePath))
 
@@ -301,7 +321,8 @@ def fnRouteDownload(vFilePath):
 
     return send_from_directory(LIBRARY_ROOT, vFilePath, as_attachment=True)
 
-
+# fetches linked .ics feed and shows todays events
+# falls back to setup page if no link or feed not showing
 @app.route("/calendar")
 @login_required
 def fnRouteCalendar():
@@ -319,7 +340,7 @@ def fnRouteCalendar():
         vResponse.raise_for_status()
         vCal = ICalendar.from_ical(vResponse.content)
 
-        # Expand recurring events. .at(vToday) returns every occurrence that
+        # returns every occurrence that
         # lands on today's date, including RRULE repeats, so a recurring event
         # shows on each day it recurs rather than only on its original start.
         lstOccurrences = recurring_ical_events.of(vCal).at(vToday)
@@ -347,6 +368,7 @@ def fnRouteCalendar():
                 "display_time": vDisplayTime
             })
 
+        # sort by start time,
         lstEvents.sort(key=lambda e: e["start"] if isinstance(e["start"], datetime)
             else datetime(e["start"].year, e["start"].month, e["start"].day))
         lstEvents = lstEvents[:20]
@@ -364,7 +386,7 @@ def fnRouteCalendar():
         tmplCalendarUrl=current_user.calendar_url
     )
 
-
+# saves the users calendar URL, accepting it only if it is an .ics link
 @app.route("/calendar/save-url", methods=["POST"])
 @login_required
 def fnRouteSaveCalendarUrl():
@@ -375,7 +397,8 @@ def fnRouteSaveCalendarUrl():
     db.session.commit()
     return redirect(url_for("fnRouteCalendar"))
 
-
+# profile page - shows users lifetime session cound and total minutes StudySession
+# queries database
 @app.route("/profile")
 @login_required
 def fnRouteProfile():
@@ -388,12 +411,12 @@ def fnRouteProfile():
         tmplTotalMinutes=vTotalMinutes
     )
 
-
+# offline fallback page, served when no connection
 @app.route("/offline")
 def fnRouteOffline():
     return render_template("offline.html")
 
-
+# serves the serviceworker script
 @app.route("/service-worker.js")
 def fnRouteServiceWorker():
     # Served from the root so the service worker's scope covers the whole app,

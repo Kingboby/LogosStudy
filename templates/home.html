@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="dashboard">
-
+    <!-- date and greeting -->
     <header class="dashboard-header">
         <p class="dash-date">{{ tmplDateStr }}</p>
         <p class="dash-greeting">{{ tmplGreeting }}, <em>{{ tmplUsername }}.</em></p>
@@ -50,6 +50,7 @@
             </div>
             <p class="streak-longest">longest · {{ tmplLongestStreak }} d</p>
 
+            <!-- activity heatmap 26 weeks of session counts -->
             <div class="activity-graph">
                 <div class="activity-header">
                     <div class="activity-day-spacer"></div>
@@ -112,7 +113,7 @@
 
 </div>
 
-<!-- Goals fullscreen overlay - unchanged -->
+<!-- Goals fullscreen overlay -->
 <div id="goals-fullscreen" class="goals-fullscreen" style="display:none;">
     <div class="goals-fullscreen-inner">
         <div class="goals-fullscreen-header">
@@ -141,14 +142,16 @@
 {% block extra_js %}
 <script src="/static/js/timer.js"></script>
 <script>
+  // Opens the fullscreen goals editor.
 function fnOpenGoals() {
     document.getElementById('goals-fullscreen').style.display = 'flex';
 }
-
+// Closes the fullscreen goals editor.
 function fnCloseGoals() {
     document.getElementById('goals-fullscreen').style.display = 'none';
 }
 
+// Sends a new goal to the server, then renders it into both goal lists.
 function fnAddGoal() {
     const vInput = document.getElementById('goal-input');
     const vDescription = vInput.value.trim();
@@ -164,7 +167,7 @@ function fnAddGoal() {
         vInput.value = '';
     });
 }
-
+// Tops up the compact dashboard list (max 6) with the next incomplete goal
 function fnFillCompactSlot() {
     const vCompactList = document.querySelector('.goals-list');
     if (vCompactList.querySelectorAll('.goals-list-item').length >= 6) return;
@@ -191,7 +194,7 @@ function fnFillCompactSlot() {
         }
     }
 }
-
+// Adjusts the "complete / total" counter without the page reloading
 function fnUpdateGoalFraction(vCompleteDelta, vTotalDelta) {
     const vFraction = document.querySelector('.goals-fraction');
     if (!vFraction) return;
@@ -199,6 +202,8 @@ function fnUpdateGoalFraction(vCompleteDelta, vTotalDelta) {
     vFraction.textContent = (lstParts[0] + vCompleteDelta) + ' / ' + (lstParts[1] + vTotalDelta);
 }
 
+// Toggles a goal's done state on the server, then syncs the fraction, the
+// fullscreen item, and the compact list (removing or re-adding the row to match).
 function fnToggleGoalComplete(vBtn, vGoalId) {
     fetch('/goal/complete/' + vGoalId, {
         method: 'POST',
@@ -249,6 +254,8 @@ function fnToggleGoalComplete(vBtn, vGoalId) {
     });
 }
 
+// Deletes a goal on the server and removes it from both lists, fixing the counter
+// and refilling the compact slot if an incomplete goal left it.
 function fnDeleteGoal(vBtn, vGoalId) {
     fetch('/goal/delete/' + vGoalId, {
         method: 'POST',
@@ -267,6 +274,8 @@ function fnDeleteGoal(vBtn, vGoalId) {
     });
 }
 
+
+// Renders a freshly added goal into the fullscreen list and, if there's room, the compact list.
 function fnAppendGoalToList(vGoal) {
     fnUpdateGoalFraction(0, 1);
     const vList = document.getElementById('goals-full-list');
