@@ -15,8 +15,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+# fallback to a local sqlite database and placeholder if no .env
+# is present so the app can run in codespaces for demo
+# in a real deployment these would be environment variables
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///logos.db")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 db.init_app(app)
 loginManager.init_app(app)
