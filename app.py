@@ -1,15 +1,14 @@
 import os
 import requests
 import recurring_ical_events
-from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta
 from icalendar import Calendar as ICalendar
 from sqlalchemy import func
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, abort, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db, loginManager
-from models import User, StudySession, Goal
+from models import User, StudySession, Goal, fnNowSydney, SYDNEY_TZ
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -48,7 +47,7 @@ def fnScanFolder(vFolderPath):
 # builds he 26 week heatmap, from todays date. lists in lstWeeks
 
 def fnBuildActivityGrid(dctSessionCounts):
-    vToday = date.today()
+    vToday = fnNowSydney().date()
     # makes sure the grid has whole weeks, ends ont he sunday of current weeks
     # then goes back 6 weeks so each column is monday -> sunday
     vEndDate = vToday + timedelta(days=(6 - vToday.weekday()))
@@ -98,7 +97,7 @@ def fnRouteWelcome():
 @app.route("/home")
 @login_required
 def fnRouteDashboard():
-    vToday = date.today()
+    vToday = fnNowSydney().date()
     vSixMonthsAgo = vToday - timedelta(days=182)
 
     lstRawCounts = (
@@ -129,7 +128,7 @@ def fnRouteDashboard():
         .all()
     )
     # pick greeting based on hour of day
-    vHour = datetime.now().hour
+    vHour = fnNowSydney().hour
     if vHour < 12:
         vGreeting = "Good morning"
     elif vHour < 17:
@@ -222,7 +221,7 @@ def fnRouteSaveSession():
     )
     db.session.add(dbSession)
 
-    vToday = date.today()
+    vToday = fnNowSydney().date()
     vLastActive = current_user.last_active
 
     #updates the streak based on gap since last study day
@@ -335,7 +334,7 @@ def fnRouteCalendar():
             tmplCalendarUrl=None
         )
 
-    vToday = date.today()
+    vToday = fnNowSydney().date()
     lstEvents = []
 
     try:
@@ -356,7 +355,7 @@ def fnRouteCalendar():
 
             if isinstance(vStart, datetime):
                 if vStart.tzinfo:
-                    vStart = vStart.astimezone(ZoneInfo("Australia/Sydney")).replace(tzinfo=None)
+                    vStart = vStart.astimezone(SYDNEY_TZ).replace(tzinfo=None)
                 vDisplayDate = vStart.strftime("%a %d %b")
                 vDisplayTime = vStart.strftime("%H:%M")
             else:

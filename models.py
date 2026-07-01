@@ -1,6 +1,13 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from flask_login import UserMixin
 from extensions import db
+
+#set all time, sydney time for HSC students
+SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+
+def fnNowSydney():
+    return datetime.now(SYDNEY_TZ).replace(tzinfo=None)
 
 # creates database table for registered accounts - flask-login expects
 class User(UserMixin, db.Model):
@@ -18,7 +25,7 @@ class Goal(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     description = db.Column(db.String(200), nullable=False)
     is_complete = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=fnNowSydney)
 
 # created table for study session, logged when timer finishes
 class StudySession(db.Model):
@@ -26,4 +33,4 @@ class StudySession(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     duration = db.Column(db.Integer, nullable=False)
     session_type = db.Column(db.String(20), nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    date = db.Column(db.DateTime, default=fnNowSydney)
